@@ -1,0 +1,50 @@
+# Generated documentation
+src/doc
+
+## --- Flutter generated .gitignore ---
+
+# Miscellaneous
+src/**/*.class
+src/**/*.log
+src/**/*.pyc
+src/**/*.swp
+src/**/.DS_Store
+src/**/.atom/
+src/**/.build/
+src/**/.buildlog/
+src/**/.history
+src/**/.svn/
+src/**/.swiftpm/
+src/**/migrate_working_dir/
+
+# IntelliJ related
+src/**/*.iml
+src/**/*.ipr
+src/**/*.iws
+src/**/.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+src/**/**/doc/api/
+src/**/**/ios/Flutter/.last_build_id
+src/**/.dart_tool/
+src/**/.flutter-plugins-dependencies
+src/**/.pub-cache/
+src/**/.pub/
+src/**/build/
+src/**/coverage/
+
+# Symbolication related
+src/**/app.*.symbols
+
+# Obfuscation related
+src/**/app.*.map.json
+
+# Android Studio will place build artifacts here
+src/**/android/app/debug
+src/**/android/app/profile
+src/**/android/app/release
