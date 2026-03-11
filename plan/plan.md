@@ -15,14 +15,14 @@
 | Lukáš | Vedouci, CI/CD (packaging)|
 
 
-## 2. Komunikačné prostridky
+## 2. Komunikačné prostředky
 - Podrobne rozdeleni uloh: GitHub Issues
 - Komunikacia: Discord
 
 ## 3. Deadliny
 GitHub Project (integracia s GitHub Issues) *prilozene screenshoty
 
-## 4. Verzovani projektu
+## 4. Verzovaní projektu
 GitHub organization repo, s strukturou feature branching (invite je poslany na ivs.kontrola@gmail.com)
 https://github.com/K0stkaORG/IVS-Projekt-2
 https://github.com/orgs/K0stkaORG/projects/1
@@ -36,6 +36,4 @@ https://github.com/orgs/K0stkaORG/projects/1
 | Vzhled | 
 | Developer Experience |  
 | Nativne multi-platform |  
-| Predchozí skušenosti |  
-
-
+| Predchozí skušenosti |
