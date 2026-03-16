@@ -1,0 +1,4 @@
+{
+	"formatter": "language_server",
+	"language_servers": ["dart", "..."],
+}
