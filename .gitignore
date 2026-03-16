@@ -1,5 +1,7 @@
 # Generated documentation
 src/doc
+!src/doc/core_algorithms.md
+!src/doc/ui_components.md
 
 ## --- Flutter generated .gitignore ---
 
