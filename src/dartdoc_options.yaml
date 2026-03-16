@@ -1,0 +1,49 @@
+dartdoc:
+  # Project metadata approximating Doxyfile settings:
+  # - PROJECT_NAME -> taken from pubspec.yaml package name
+  # - PROJECT_NUMBER -> taken from pubspec.yaml version
+  # - OUTPUT_DIRECTORY -> configured when running `dart doc -o ...`
+  # - OUTPUT_LANGUAGE -> not supported by dartdoc; comments should stay in one language consistently
+  # - DOXYFILE_ENCODING / INPUT_ENCODING -> not configurable in dartdoc;
+  #   UTF-8 is the practical standard for this file and Dart sources
+
+  # Build/input scoping closest to INPUT, FILE_PATTERNS, RECURSIVE and EXCLUDE.
+  # Leave library discovery to dartdoc so Flutter app libraries are found correctly.
+
+  # Treat matching files as undocumented, similar to excluding implementation details.
+  nodoc:
+    - lib/src/internal_*.dart
+    - lib/experimental/**
+
+  # Exclude local libraries from generated docs if they are added later.
+  exclude:
+    - src.internal_*.dart
+    - experimental
+
+  # Structured topical pages for generated documentation.
+  categories:
+    core-algorithms:
+      displayName: Core Algorithms
+      markdown: doc/core_algorithms.md
+    ui-components:
+      displayName: UI Components
+      markdown: doc/ui_components.md
+
+  categoryOrder:
+    - core-algorithms
+    - ui-components
+
+  # Approximation of IMAGE_PATH / project presentation options.
+  favicon: web/favicon.png
+
+  # Warning/error handling closest to Doxygen warning configuration.
+  # This helps detect bad references and missing public API comments.
+  errors:
+    - unresolved-doc-reference
+  warnings:
+    - missing-doc-comment
+    - type-as-html
+
+  # Keep known noisy warning classes visible but non-fatal unless explicitly promoted above.
+  ignore:
+    - ambiguous-doc-reference
