@@ -11,9 +11,8 @@
 | Jméno | Rola |
 | -------------- | --------------- |
 | David | Graficke rozhrani, Testing|
-| Jan |Profiling, Matematicka kniznica|
-| Lukáš | Vedouci, CI/CD (packaging)|
-
+| Jan |Profiling, matematicka kniznica|
+| Lukáš | Vedouci, user input handling|
 
 ## 2. Komunikačné prostředky
 - Podrobne rozdeleni uloh: GitHub Issues
