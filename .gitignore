@@ -1,52 +1,123 @@
-# Generated documentation
-src/doc/**
-!src/doc/core_algorithms.md
-!src/doc/ui_components.md
-
-## --- Flutter generated .gitignore ---
+# Created by https://gitignore.org
+# Flutter.gitignore
 
 # Miscellaneous
-src/**/*.class
-src/**/*.log
-src/**/*.pyc
-src/**/*.swp
-src/**/.DS_Store
-src/**/.atom/
-src/**/.build/
-src/**/.buildlog/
-src/**/.history
-src/**/.svn/
-src/**/.swiftpm/
-src/**/migrate_working_dir/
+*.class
+*.lock
+*.log
+*.pyc
+*.swp
+.buildlog/
+.history
 
-# IntelliJ related
-src/**/*.iml
-src/**/*.ipr
-src/**/*.iws
-src/**/.idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+
+# Flutter repo-specific
+src/bin/cache/
+src/bin/internal/bootstrap.bat
+src/bin/internal/bootstrap.sh
+src/bin/mingit/
+src/dev/benchmarks/mega_gallery/
+src/dev/bots/.recipe_deps
+src/dev/bots/android_tools/
+src/dev/devicelab/ABresults*.json
+src/dev/docs/doc/
+src/dev/docs/flutter.docs.zip
+src/dev/docs/lib/
+src/dev/docs/pubspec.yaml
+src/dev/integration_tests/**/xcuserdata
+src/dev/integration_tests/**/Pods
+src/packages/flutter/coverage/
+src/version
+src/analysis_benchmark.json
+
+# packages file containing multi-root paths
+src/.packages.generated
 
 # Flutter/Dart/Pub related
-src/**/**/doc/api/
-src/**/**/ios/Flutter/.last_build_id
-src/**/.dart_tool/
-src/**/.flutter-plugins-dependencies
-src/**/.pub-cache/
-src/**/.pub/
-src/**/build/
-src/**/coverage/
+**/doc/api/
+src/.dart_tool/
+src/.flutter-plugins
+src/.flutter-plugins-dependencies
+**/generated_plugin_registrant.dart
+src/.packages
+src/.pub-preload-cache/
+src/.pub/
+src/build/
+src/flutter_*.png
+src/linked_*.ds
+src/unlinked.ds
+src/unlinked_spec.ds
 
-# Symbolication related
-src/**/app.*.symbols
+# Android related
+**/android/**/gradle-wrapper.jar
+src/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
 
-# Obfuscation related
-src/**/app.*.map.json
+# iOS/XCode related
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
 
-# Android Studio will place build artifacts here
-src/**/android/app/debug
-src/**/android/app/profile
-src/**/android/app/release
+# macOS
+**/Flutter/ephemeral/
+**/Pods/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral
+**/xcuserdata/
+
+# Windows
+**/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugin_registrant.h
+**/windows/flutter/generated_plugins.cmake
+
+# Linux
+**/linux/flutter/generated_plugin_registrant.cc
+**/linux/flutter/generated_plugin_registrant.h
+**/linux/flutter/generated_plugins.cmake
+
+# Coverage
+src/coverage/
+
+# Symbols
+src/app.*.symbols
+
+# Exceptions to above rules.
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.perspectivev3
+!src/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+!src/dev/ci/**/Gemfile.lock
+!src/pubspec.lock
