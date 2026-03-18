@@ -1,5 +1,4 @@
 // Project tasks configuration. See https://zed.dev/docs/tasks for documentation.
-
 [
   {
     "label": "Build and host docs",
@@ -7,4 +6,8 @@
     "hide": "always",
     "reveal": "no_focus",
   },
+  {
+    "label": "Flutter run",
+    "command": "cd src; flutter run",
+  }
 ]
