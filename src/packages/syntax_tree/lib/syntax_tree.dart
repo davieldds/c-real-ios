@@ -1,39 +1,60 @@
-class Expresion {
-  Expresion? parent;
+class Expression {
+  Expression? parent;
   num? value = 0;
   int? precision = 0;
-  Expresion();
+  Expression();
 }
 
 enum Operation { add, sub, mul, div }
 
-class BinaryExpresion extends Expresion {
-  Expresion? leftArg;
-  Expresion? rightArg;
+class BinaryExpression extends Expression {
+  Expression? leftArg;
+  Expression? rightArg;
   Operation op;
-  BinaryExpresion(this.op, this.leftArg, this.rightArg);
+  BinaryExpression(this.op, this.leftArg, this.rightArg);
 }
 
 enum Func { pwr, sqrt, fact }
 
-class UnaryExpresion extends Expresion {
-  Expresion? arg;
+class UnaryExpression extends Expression {
+  Expression? arg;
   Func op;
-  UnaryExpresion(this.op, this.arg);
+  UnaryExpression(this.op, this.arg);
 }
 
 class SyntaxTree {
-  Expresion? root;
+  Expression? root;
 
-  void addExpresion(Object input) {
-    // add expresion to tree
+  void clear() {
+    // deletes the tree
   }
 
-  void removeExpresion(Expresion exp) {
-    // remove expresion from tree
+  void addExpression(Object input) {
+    // add expression to tree
   }
 
-  List<Expresion>? getLeafExpresions() {
-    // return list of leaf nodes
+  void replaceExpression(Expression target, Expression replacement) {
+    // replace expresion with different one
+  }
+
+  void applyUnaryExpression(Expression target, Func function) {
+    //applies function onto a Expression
+  }
+
+  void applyBinaryExpression(
+    Expression target,
+    Operation op, {
+    required bool shouldBindNext,
+    Expression? nextExpression,
+  }) {
+    // applies operation onto Expression, optionaly bind next Expression and the other argument
+  }
+
+  void removeExpression(Expression exp) {
+    // remove expression from tree
+  }
+
+  List<Expression>? getLeafExpressions() {
+    // return list of leaf expressions
   }
 }
