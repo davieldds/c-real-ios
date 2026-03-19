@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:exui/exui.dart';
 
 void main() {
   runApp(const MainApp());
@@ -14,58 +15,35 @@ class MainApp extends StatelessWidget {
       title: appTitle,
       home: Scaffold(
         appBar: AppBar(
-          leading: Text("Menu Hamburger"),
-          title: const Text(appTitle),
+          leading: "Menu Hamburger".text(),
+          title: appTitle.text(),
         ),
-        body: Column(
-          spacing: 10.0,
-          children: [
-            Container(
-              height: 150,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 5,
-                    child: Text("Syntax highlighted input field"),
-                  ),
-                  VerticalDivider(),
-                  Expanded(child: Text("Submit Button")),
-                ],
-              ),
-            ),
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-              ),
-              child: Row(
-                children: [
-                  Expanded(flex: 5, child: Text("Result Bar")),
-                  VerticalDivider(),
-                  Expanded(
-                    child: Text("Convert button from decimal to fractional"),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              height: 350,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-              ),
-              child: Row(
-                children: [
-                  Expanded(child: Text("History")),
-                  VerticalDivider(),
-                  Expanded(child: Text("Function pad")),
-                ],
-              ),
-            ),
-          ],
-        ),
+        body: [
+          [
+            "Syntax highlighted input field".text().expanded5,
+            const VerticalDivider(),
+            "Submit Button".text().expanded1,
+          ].row().container(
+            height: 150,
+            decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+          ),
+          [
+            "Result Bar".text().expanded5,
+            const VerticalDivider(),
+            "Convert button from decimal to fractional".text().expanded1,
+          ].row().container(
+            height: 50,
+            decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+          ),
+          [
+            "History".text().expanded1,
+            const VerticalDivider(),
+            "Function pad".text().expanded1,
+          ].row().container(
+            height: 350,
+            decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+          ),
+        ].column(spacing: 10.0),
       ),
     );
   }
