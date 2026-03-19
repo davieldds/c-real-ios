@@ -1,5 +1,6 @@
 class Expression {
   Expression? parent;
+  String? error;
   num? value = 0;
   int? precision = 0;
   Expression();
@@ -54,7 +55,11 @@ class SyntaxTree {
     // remove expression from tree
   }
 
+  List<Expression>? getErrorExpresions() {
+    // returns list of expressions with error
+  }
+
   List<Expression>? getLeafExpressions() {
-    // return list of leaf expressions
+    // returns list of leaf expressions
   }
 }
