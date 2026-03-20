@@ -36,7 +36,7 @@ src/.packages.generated
 
 # Flutter/Dart/Pub related
 **/doc/api/
-src/.dart_tool/
+src/**/.dart_tool/
 src/.flutter-plugins
 src/.flutter-plugins-dependencies
 **/generated_plugin_registrant.dart
