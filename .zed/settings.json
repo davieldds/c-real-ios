@@ -1,4 +1,11 @@
 {
-	"formatter": "language_server",
-	"language_servers": ["dart", "..."],
+    "languages": {
+        "Dart": {
+            "formatter": "language_server",
+            "language_servers": [
+                "dart",
+                "..."
+            ],
+        }
+    },
 }
