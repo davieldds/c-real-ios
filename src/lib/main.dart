@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:exui/exui.dart';
 
+/// Starts the calculator application.
 void main() {
   runApp(const MainApp());
 }
 
+/// Root widget configuring the Material 3 app shell.
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
@@ -20,6 +22,8 @@ class MainApp extends StatelessWidget {
   }
 }
 
+/// Main calculator screen containing the expression field, result bar,
+/// history panel, function pad, and app menu.
 class CalculatorPage extends StatefulWidget {
   const CalculatorPage({super.key, required this.title});
 
@@ -29,6 +33,10 @@ class CalculatorPage extends StatefulWidget {
   State<CalculatorPage> createState() => _CalculatorPageState();
 }
 
+/// State for [CalculatorPage].
+///
+/// Manages text insertion into the expression field and the interactive UI
+/// controls for the calculator layout.
 class _CalculatorPageState extends State<CalculatorPage> {
   final TextEditingController _expressionController = TextEditingController();
   final FocusNode _expressionFocusNode = FocusNode();
@@ -64,6 +72,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
     ],
   ];
 
+  /// Releases controller and focus resources used by the expression field.
   @override
   void dispose() {
     _expressionController.dispose();
@@ -71,6 +80,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
     super.dispose();
   }
 
+  /// Inserts [text] into the expression field at the current cursor or
+  /// selection position.
+  ///
+  /// If the inserted text contains `()`, the caret is moved inside the
+  /// parentheses to make function entry faster.
   void _insertText(String text) {
     final TextEditingValue value = _expressionController.value;
     final TextSelection selection = value.selection;
@@ -90,6 +104,10 @@ class _CalculatorPageState extends State<CalculatorPage> {
     _expressionFocusNode.requestFocus();
   }
 
+  /// Calculates the target caret position after inserting [insertedText].
+  ///
+  /// For function-like values ending in `()`, the caret is placed between the
+  /// parentheses. Otherwise it is placed after the inserted text.
   int _calculateCaretOffset(String insertedText) {
     final int parenthesisIndex = insertedText.indexOf('()');
     if (parenthesisIndex != -1) {
@@ -98,6 +116,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
     return insertedText.length;
   }
 
+  /// Removes the selected text or the character immediately before the caret.
   void _backspace() {
     final TextEditingValue value = _expressionController.value;
     final TextSelection selection = value.selection;
@@ -139,11 +158,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
     _expressionFocusNode.requestFocus();
   }
 
+  /// Clears the entire expression field and returns focus to it.
   void _clearExpression() {
     _expressionController.clear();
     _expressionFocusNode.requestFocus();
   }
 
+  /// Builds the calculator UI layout.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -431,6 +452,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
   }
 }
 
+/// Describes a single scientific function button and the text it inserts into
+/// the expression field when pressed.
 class _FunctionButtonData {
   const _FunctionButtonData({required this.label, required this.insertion});
 
@@ -438,4 +461,5 @@ class _FunctionButtonData {
   final String insertion;
 }
 
+/// Actions available from the calculator app bar menu.
 enum _AppMenuAction { about }
