@@ -57,9 +57,11 @@ class SyntaxTree {
 
   List<Expression>? getErrorExpresions() {
     // returns list of expressions with error
+    return null;
   }
 
   List<Expression>? getLeafExpressions() {
     // returns list of leaf expressions
+    return null;
   }
 }
