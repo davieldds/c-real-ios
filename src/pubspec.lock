@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  exui:
+    dependency: "direct main"
+    description:
+      name: exui
+      sha256: "2aaec869efcea5540c586016f2e5666e169284758025040a7ffc2d73ef0018a1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.11"
   fake_async:
     dependency: transitive
     description:
