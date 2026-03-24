@@ -1,49 +1,80 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Flutter Tests
+name: Lint and test
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
 
 jobs:
-  tests:
-    runs-on: self-hosted
+    validate:
+        name: ${{ matrix.package.name }}
+        runs-on: self-hosted
+        strategy:
+            fail-fast: false
+            matrix:
+                package:
+                    - name: UI
+                      dir: src
+                      is_flutter: true
+                    - name: MathCore
+                      dir: src/packages/math_core
+                      is_flutter: false
+                    - name: StdDev
+                      dir: src/packages/stddev
+                      is_flutter: false
+                    - name: SyntaxTree
+                      dir: src/packages/syntax_tree
+                      is_flutter: true
 
-    defaults:
-      run:
-        working-directory: src
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-    steps:
-      - uses: actions/checkout@v4
+            - name: Set up Flutter (stable)
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: stable
+                  cache: true
 
-      # Set up Flutter (includes Dart SDK)
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: false
+            - name: Allow Flutter SDK git directory
+              run: git config --global --add safe.directory "$FLUTTER_ROOT"
 
-      - name: Allow Flutter SDK git directory
-        run: git config --global --add safe.directory "$FLUTTER_ROOT"
+            - name: Cache pub-cache
+              uses: actions/cache@v4
+              with:
+                  path: ${{ env.PUB_CACHE || '~/.pub-cache' }}
+                  key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pub-cache-
 
-      - name: Install dependencies
-        run: flutter pub get
+            - name: Install Dependencies
+              working-directory: ${{ matrix.package.dir }}
+              run: |
+                  if [ "${{ matrix.package.is_flutter }}" = "true" ]; then
+                    flutter pub get
+                  else
+                    dart pub get
+                  fi
 
-      # Uncomment this step to verify the use of 'dart format' on each commit.
-      # - name: Verify formatting
-      #   run: dart format --output=none --set-exit-if-changed .
+            - name: Analyze
+              working-directory: ${{ matrix.package.dir }}
+              run: |
+                  if [ "${{ matrix.package.is_flutter }}" = "true" ]; then
+                    flutter analyze --fatal-infos
+                  else
+                    dart analyze
+                  fi
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      - name: Analyze project source
-        run: flutter analyze --fatal-infos
-
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
-      - name: Run tests
-        run: flutter test
+            - name: Run Tests
+              working-directory: ${{ matrix.package.dir }}
+              run: |
+                  if grep -q "^[[:space:]]*test:" pubspec.yaml || grep -q "^[[:space:]]*flutter_test:" pubspec.yaml; then
+                    if [ "${{ matrix.package.is_flutter }}" = "true" ]; then
+                      flutter test
+                    else
+                      dart test
+                    fi
+                  else
+                    echo "No test dependency found; skipping tests for ${{ matrix.package.name }}."
+                  fi

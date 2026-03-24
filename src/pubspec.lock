@@ -131,6 +131,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  math_core:
+    dependency: "direct main"
+    description:
+      path: "packages/math_core"
+      relative: true
+    source: path
+    version: "0.1.0"
   meta:
     dependency: transitive
     description:
@@ -184,6 +191,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  syntax_tree:
+    dependency: transitive
+    description:
+      path: "packages/syntax_tree"
+      relative: true
+    source: path
+    version: "0.0.1"
   term_glyph:
     dependency: transitive
     description:
