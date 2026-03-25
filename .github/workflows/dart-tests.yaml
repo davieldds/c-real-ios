@@ -67,6 +67,7 @@ jobs:
                   fi
 
             - name: Run Tests
+              if: success() || failure()
               working-directory: ${{ matrix.package.dir }}
               run: |
                   if grep -q "^[[:space:]]*test:" pubspec.yaml || grep -q "^[[:space:]]*flutter_test:" pubspec.yaml; then
