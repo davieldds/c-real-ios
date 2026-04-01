@@ -19,41 +19,41 @@ help:
 
 install:
 	flutter pub get
-	dart pub get -C packages/math_core
-	dart pub get -C packages/stddev
-	dart pub get -C packages/syntax_tree
+	flutter pub get -C packages/math_core
+	flutter pub get -C packages/stddev
+	flutter pub get -C packages/syntax_tree
 
 test: install FORCE
 	flutter analyze
 	flutter test
 
-	cd packages/math_core && dart analyze
-	cd packages/math_core && dart test
+	cd packages/math_core && flutter analyze
+	cd packages/math_core && flutter test
 
-	cd packages/stddev && dart analyze
-	cd packages/stddev && dart test
+	cd packages/stddev && flutter analyze
+	cd packages/stddev && flutter test
 
-	cd packages/syntax_tree && dart analyze
-	cd packages/syntax_tree && dart test
+	cd packages/syntax_tree && flutter analyze
+	cd packages/syntax_tree && flutter test
 
 doc: FORCE
-	dart pub get
-	dart doc .
+	flutter pub get
+	flutter doc .
 
 run:
-	flutter run lib/main.dart
+	flutter run lib/main.flutter
 
 stddev:
 	mkdir -p build/stddev
-	dart compile exe packages/stddev/bin/stddev.dart -o build/stddev/stddev
+	flutter compile exe packages/stddev/bin/stddev.flutter -o build/stddev/stddev
 
 pack: clean
 	mkdir -p dist
 	tar --exclude-vcs \
 		--exclude='dist' \
 		--exclude='build' \
-		--exclude='.dart_tool' \
-		--exclude='**/.dart_tool' \
+		--exclude='.flutter_tool' \
+		--exclude='**/.flutter_tool' \
 		--exclude='**/build' \
 		-czf dist/ivs-projekt-2.tar.gz .
 
