@@ -60,7 +60,7 @@ pack: clean
 clean:
 	rm -rf build dist
 	find . -type d -name ".dart_tool" -prune -exec rm -rf {} +
-	find . -type d -name "doc" -prune -exec rm -rf {} +
+	find . -type d -path "*/doc/api" -prune -exec rm -rf {} +
 	find . -type d -name ".flutter-plugins-dependencies" -prune -exec rm -rf {} +
 
 FORCE:
