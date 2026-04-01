@@ -48,6 +48,7 @@ src/flutter_*.png
 src/linked_*.ds
 src/unlinked.ds
 src/unlinked_spec.ds
+**/build/
 
 # Android related
 **/android/**/gradle-wrapper.jar
@@ -96,6 +97,7 @@ src/.gradle/
 **/macos/Flutter/GeneratedPluginRegistrant.swift
 **/macos/Flutter/ephemeral
 **/xcuserdata/
+**/.DS_store
 
 # Windows
 **/windows/flutter/generated_plugin_registrant.cc
