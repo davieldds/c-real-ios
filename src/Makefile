@@ -41,11 +41,11 @@ doc: FORCE
 	flutter doc .
 
 run:
-	flutter run lib/main.flutter
+	flutter run lib/main.dart
 
 stddev:
 	mkdir -p build/stddev
-	flutter compile exe packages/stddev/bin/stddev.flutter -o build/stddev/stddev
+	flutter compile exe packages/stddev/bin/stddev.dart -o build/stddev/stddev
 
 pack: clean
 	mkdir -p dist
