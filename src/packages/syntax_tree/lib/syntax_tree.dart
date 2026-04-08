@@ -1,30 +1,9 @@
-class Expression {
-  Expression? parent;
-  String? error;
-  num? value = 0;
-  int? precision = 0;
-  Expression();
-}
-
-enum Operation { add, sub, mul, div }
-
-class BinaryExpression extends Expression {
-  Expression? leftArg;
-  Expression? rightArg;
-  Operation op;
-  BinaryExpression(this.op, this.leftArg, this.rightArg);
-}
-
-enum Func { pwr, sqrt, fact }
-
-class UnaryExpression extends Expression {
-  Expression? arg;
-  Func op;
-  UnaryExpression(this.op, this.arg);
-}
+import 'package:syntax_tree/expression.dart';
 
 class SyntaxTree {
   Expression? root;
+
+  SyntaxTree([this.root]);
 
   void clear() {
     // deletes the tree
@@ -32,23 +11,6 @@ class SyntaxTree {
 
   void addExpression(Object input) {
     // add expression to tree
-  }
-
-  void replaceExpression(Expression target, Expression replacement) {
-    // replace expresion with different one
-  }
-
-  void applyUnaryExpression(Expression target, Func function) {
-    //applies function onto a Expression
-  }
-
-  void applyBinaryExpression(
-    Expression target,
-    Operation op, {
-    required bool shouldBindNext,
-    Expression? nextExpression,
-  }) {
-    // applies operation onto Expression, optionaly bind next Expression and the other argument
   }
 
   void removeExpression(Expression exp) {
