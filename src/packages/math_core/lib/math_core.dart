@@ -1,3 +1,4 @@
+import 'package:syntax_tree/expression.dart';
 import 'package:syntax_tree/syntax_tree.dart';
 
 /// MathCore is a math library that evaluates the value of each node in a given syntax tree.
