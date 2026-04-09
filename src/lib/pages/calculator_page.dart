@@ -1,5 +1,8 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:math_keyboard/math_keyboard.dart';
+// ignore: implementation_imports
+import 'package:math_keyboard/src/foundation/node.dart';
 
 import '../models/function_button_data.dart';
 import '../models/history_entry.dart';
@@ -27,7 +30,8 @@ class CalculatorPage extends StatefulWidget {
 /// Manages text insertion into the expression field and interactive controls
 /// used by the calculator UI.
 class _CalculatorPageState extends State<CalculatorPage> {
-  final TextEditingController _expressionController = TextEditingController();
+  final MathFieldEditingController _expressionController =
+      MathFieldEditingController();
   final FocusNode _expressionFocusNode = FocusNode();
 
   static const List<HistoryEntry> _historyItems = [
@@ -40,25 +44,25 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   static const List<List<FunctionButtonData>> _functionRows = [
     [
-      FunctionButtonData(label: 'sin', insertion: 'sin()'),
-      FunctionButtonData(label: 'cos', insertion: 'cos()'),
-      FunctionButtonData(label: 'tan', insertion: 'tan()'),
-      FunctionButtonData(label: 'ln', insertion: 'ln()'),
-      FunctionButtonData(label: 'log', insertion: 'log()'),
+      FunctionButtonData(label: 'sin', insertion: r'\sin'),
+      FunctionButtonData(label: 'cos', insertion: r'\cos'),
+      FunctionButtonData(label: 'tan', insertion: r'\tan'),
+      FunctionButtonData(label: 'ln', insertion: r'\ln'),
+      FunctionButtonData(label: 'log', insertion: r'\log_'),
     ],
     [
-      FunctionButtonData(label: 'asin', insertion: 'asin()'),
-      FunctionButtonData(label: 'acos', insertion: 'acos()'),
-      FunctionButtonData(label: 'atan', insertion: 'atan()'),
-      FunctionButtonData(label: '√', insertion: 'sqrt()'),
+      FunctionButtonData(label: 'asin', insertion: r'\sin^{-1}'),
+      FunctionButtonData(label: 'acos', insertion: r'\cos^{-1}'),
+      FunctionButtonData(label: 'atan', insertion: r'\tan^{-1}'),
+      FunctionButtonData(label: '√', insertion: r'\sqrt{'),
       FunctionButtonData(label: 'x²', insertion: '^2'),
     ],
     [
       FunctionButtonData(label: 'xʸ', insertion: '^'),
-      FunctionButtonData(label: 'π', insertion: 'pi'),
+      FunctionButtonData(label: 'π', insertion: r'\pi'),
       FunctionButtonData(label: 'e', insertion: 'e'),
       FunctionButtonData(label: '|x|', insertion: 'abs()'),
-      FunctionButtonData(label: 'mod', insertion: 'mod'),
+      FunctionButtonData(label: 'mod', insertion: r'\mod'),
     ],
     [
       FunctionButtonData(label: '(', insertion: '('),
@@ -71,88 +75,57 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   /// Releases controller and focus resources used by the expression field.
   @override
+  void initState() {
+    super.initState();
+    _expressionController.addListener(() {
+      try {
+        final tex = _expressionController.currentEditingValue();
+        TeXParser(tex).parse();
+        // You can update the live result here if desired using the parsed expression
+      } catch (e) {
+        // Ignore parse errors while typing
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _expressionController.dispose();
     _expressionFocusNode.dispose();
     super.dispose();
   }
 
-  /// Inserts [text] into the expression field at the current cursor or
-  /// selection position.
-  ///
-  /// If the inserted text contains `()`, the caret is moved inside the
-  /// parentheses to make function entry faster.
+  /// Inserts [text] into the expression field using the MathField controller.
   void _insertText(String text) {
-    final TextEditingValue value = _expressionController.value;
-    final TextSelection selection = value.selection;
-    final int start = selection.start >= 0
-        ? selection.start
-        : value.text.length;
-    final int end = selection.end >= 0 ? selection.end : value.text.length;
-
-    final String newText = value.text.replaceRange(start, end, text);
-    final int caretOffset = _calculateCaretOffset(text);
-
-    _expressionController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: start + caretOffset),
-    );
-
-    _expressionFocusNode.requestFocus();
-  }
-
-  /// Calculates the target caret position after inserting [insertedText].
-  ///
-  /// For function-like values ending in `()`, the caret is placed between the
-  /// parentheses. Otherwise it is placed after the inserted text.
-  int _calculateCaretOffset(String insertedText) {
-    final int parenthesisIndex = insertedText.indexOf('()');
-    if (parenthesisIndex != -1) {
-      return parenthesisIndex + 1;
+    if (text == r'\sqrt{') {
+      _expressionController.addFunction(r'\sqrt', [TeXArg.braces]);
+    } else if (text == '^') {
+      _expressionController.addFunction('^', [TeXArg.braces]);
+    } else if (text == r'\log_') {
+      _expressionController.addFunction(r'\log_', [
+        TeXArg.braces,
+        TeXArg.parentheses,
+      ]);
+    } else if (const [
+      r'\sin',
+      r'\cos',
+      r'\tan',
+      r'\ln',
+      r'\sin^{-1}',
+      r'\cos^{-1}',
+      r'\tan^{-1}',
+    ].contains(text)) {
+      _expressionController.addFunction(text, [TeXArg.parentheses]);
+    } else if (text == 'abs()') {
+      _expressionController.addLeaf('|');
+    } else {
+      _expressionController.addLeaf(text);
     }
-    return insertedText.length;
   }
 
-  /// Removes the selected text or the character immediately before the caret.
+  /// Removes the character immediately before the caret.
   void _backspace() {
-    final TextEditingValue value = _expressionController.value;
-    final TextSelection selection = value.selection;
-
-    if (selection.start < 0 || selection.end < 0) {
-      return;
-    }
-
-    if (!selection.isCollapsed) {
-      final String newText = value.text.replaceRange(
-        selection.start,
-        selection.end,
-        '',
-      );
-      _expressionController.value = TextEditingValue(
-        text: newText,
-        selection: TextSelection.collapsed(offset: selection.start),
-      );
-      _expressionFocusNode.requestFocus();
-      return;
-    }
-
-    if (selection.start == 0) {
-      return;
-    }
-
-    final int removeIndex = selection.start - 1;
-    final String newText = value.text.replaceRange(
-      removeIndex,
-      selection.start,
-      '',
-    );
-
-    _expressionController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: removeIndex),
-    );
-
-    _expressionFocusNode.requestFocus();
+    _expressionController.goBack(deleteMode: true);
   }
 
   /// Clears the entire expression field and returns focus to it.
@@ -203,7 +176,12 @@ class _CalculatorPageState extends State<CalculatorPage> {
               functionRows: _functionRows,
               onDeletePressed: _backspace,
               onClearPressed: _clearExpression,
-              onFractionPressed: () {},
+              onFractionPressed: () {
+                _expressionController.addFunction(r'\frac', [
+                  TeXArg.braces,
+                  TeXArg.braces,
+                ]);
+              },
               onFunctionPressed: _insertText,
             ).expanded1,
           ].row().container(height: 350),

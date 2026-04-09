@@ -18,6 +18,7 @@ class MainApp extends StatelessWidget {
 
     return MaterialApp(
       title: appTitle,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
       home: const CalculatorPage(title: appTitle),
     );

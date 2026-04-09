@@ -1,0 +1,31 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for the main Flutter/Dart app in src
+  - package-ecosystem: "pub"
+    directory: "/src"
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for the stddev package
+  - package-ecosystem: "pub"
+    directory: "/src/packages/stddev"
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for the math_core package
+  - package-ecosystem: "pub"
+    directory: "/src/packages/math_core"
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for the syntax_tree package
+  - package-ecosystem: "pub"
+    directory: "/src/packages/syntax_tree"
+    schedule:
+      interval: "daily"
