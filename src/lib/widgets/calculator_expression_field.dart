@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_keyboard/math_keyboard.dart';
 
 /// Expression editor used for manual formula entry.
 ///
@@ -14,7 +15,7 @@ class CalculatorExpressionField extends StatelessWidget {
   });
 
   /// Controller used to read and modify the expression text.
-  final TextEditingController controller;
+  final MathFieldEditingController controller;
 
   /// Focus node used to restore keyboard focus after function insertion.
   final FocusNode focusNode;
@@ -23,18 +24,29 @@ class CalculatorExpressionField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        maxLines: null,
-        expands: true,
-        textAlignVertical: TextAlignVertical.top,
+      // We use MathField here for native LaTeX rendering.
+      // opensKeyboard is set to false because we want to embed the math keyboard
+      // inside our custom calculator_function_pad.dart instead of using the overlay.
+      child: InputDecorator(
         decoration: const InputDecoration(
           labelText: 'Expression',
           hintText: 'Enter your calculation here',
-          alignLabelWithHint: true,
           border: OutlineInputBorder(),
           prefixIcon: Icon(Icons.functions),
+        ),
+        child: ClipRect(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: MathField(
+              controller: controller,
+              focusNode: focusNode,
+              opensKeyboard: false,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
         ),
       ),
     );
