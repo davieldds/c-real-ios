@@ -1,3 +1,4 @@
+import 'package:syntax_tree/evaluation_result.dart';
 import 'package:syntax_tree/expression.dart';
 import 'package:syntax_tree/expression_types.dart';
 import 'package:test/test.dart';
@@ -15,15 +16,18 @@ void main() {
     expr.replaceWith(replacement);
 
     expect(expr.parent, same(originalParent));
-    expect(expr.error, equals(replacement.error));
     expect(expr.value, equals(replacement.value));
-    expect(expr.precision, equals(replacement.precision));
   });
 
   group('Expression.applyExpression', () {
     late LiteralExpression nextExpression;
     setUp(() {
-      nextExpression = LiteralExpression(69);
+      nextExpression = LiteralExpression(
+        value: RationalResult(
+          numerator: BigInt.from(69),
+          denominator: BigInt.one,
+        ),
+      );
     });
     group('Binary Expression', () {
       test('Binding next', () {

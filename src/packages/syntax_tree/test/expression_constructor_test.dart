@@ -1,3 +1,4 @@
+import 'package:syntax_tree/evaluation_result.dart';
 import 'package:syntax_tree/expression.dart';
 import 'package:syntax_tree/expression_types.dart';
 import 'package:test/test.dart';
@@ -8,62 +9,55 @@ void main() {
       final expr = Expression();
 
       expect(expr.parent, isNull);
-      expect(expr.error, equals(""));
       expect(expr.value, isNull);
-      expect(expr.precision, equals(0));
     });
 
     test('Constructor with parameters', () {
       final parent = Expression();
-      final expr = Expression(
-        parent: parent,
-        error: "Err",
-        value: 67,
-        precision: 10,
-      );
+      final result = ErrorResult('Err');
+      final expr = Expression(parent: parent, value: result);
 
       expect(expr.parent, same(parent));
-      expect(expr.error, equals("Err"));
-      expect(expr.value, equals(67));
-      expect(expr.precision, equals(10));
+      expect(expr.value, same(result));
     });
 
     test('Constructor with null parameters', () {
       final expr = Expression(parent: null, value: null);
 
       expect(expr.parent, isNull);
-      expect(expr.error, equals(""));
       expect(expr.value, isNull);
-      expect(expr.precision, equals(0));
     });
   });
 
   group('Literal Expression: ', () {
     test('Positive integer', () {
-      final expr = LiteralExpression(67);
+      final value = RationalResult(
+        numerator: BigInt.from(67),
+        denominator: BigInt.one,
+      );
+      final expr = LiteralExpression(value: value);
 
-      expect(expr.value, equals(67));
+      expect(expr.value, same(value));
       expect(expr.parent, isNull);
-      expect(expr.error, "");
-      expect(expr.precision, equals(0));
     });
 
     test('Negative integer', () {
-      final expr = LiteralExpression(-67);
+      final value = RationalResult(
+        numerator: BigInt.from(-67),
+        denominator: BigInt.one,
+      );
+      final expr = LiteralExpression(value: value);
 
-      expect(expr.value, equals(-67));
+      expect(expr.value, same(value));
       expect(expr.parent, isNull);
-      expect(expr.error, "");
-      expect(expr.precision, equals(0));
     });
 
     test('Float', () {
-      final expr = LiteralExpression(67.69);
+      final value = RealResult(mantissa: BigInt.from(6769), scale: 2);
+      final expr = LiteralExpression(value: value);
 
-      expect(expr.value, equals(67.69));
+      expect(expr.value, same(value));
       expect(expr.parent, isNull);
-      expect(expr.error, "");
-      expect(expr.precision, equals(0));
     });
   });
 
@@ -72,8 +66,18 @@ void main() {
     late LiteralExpression arg2;
 
     setUp(() {
-      arg1 = LiteralExpression(69);
-      arg2 = LiteralExpression(420);
+      arg1 = LiteralExpression(
+        value: RationalResult(
+          numerator: BigInt.from(69),
+          denominator: BigInt.one,
+        ),
+      );
+      arg2 = LiteralExpression(
+        value: RationalResult(
+          numerator: BigInt.from(420),
+          denominator: BigInt.one,
+        ),
+      );
     });
 
     test('both args', () {

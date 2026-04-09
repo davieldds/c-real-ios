@@ -1,10 +1,10 @@
+import 'package:syntax_tree/evaluation_result.dart';
+
 class Expression {
   Expression? parent;
-  String error;
-  num? value;
-  int precision;
+  EvaluationResult? value;
 
-  Expression({this.parent, this.error = "", this.value, this.precision = 0});
+  Expression({this.parent, this.value});
 
   void replaceWith(Expression replacement) {
     // replace expression with different one
@@ -20,24 +20,11 @@ class BinaryExpression extends Expression {
   Expression? leftArg;
   Expression? rightArg;
 
-  BinaryExpression({
-    super.parent,
-    super.error,
-    super.value,
-    super.precision,
-    this.leftArg,
-    this.rightArg,
-  });
+  BinaryExpression({super.parent, super.value, this.leftArg, this.rightArg});
 }
 
 class UnaryExpression extends Expression {
   Expression? arg;
 
-  UnaryExpression({
-    super.parent,
-    super.error,
-    super.value,
-    super.precision,
-    this.arg,
-  });
+  UnaryExpression({super.parent, super.value, this.arg});
 }
