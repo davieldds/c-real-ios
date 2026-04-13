@@ -117,6 +117,13 @@ void expectPrecision(Expression exp, int precision) {
   fail('Expected a RealResult for precision checks.');
 }
 
+void expectRealScale(Expression exp, int expectedScale) {
+  final result = _requireResult(exp);
+  expect(result, isA<RealResult>());
+  final real = result as RealResult;
+  expect(real.scale, equals(expectedScale));
+}
+
 void expectBinaryArgs(BinaryExpression exp, Expression left, Expression right) {
   expect(exp.leftArg, same(left));
   expect(exp.rightArg, same(right));

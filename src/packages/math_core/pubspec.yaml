@@ -1,5 +1,5 @@
 name: math_core
-description: "Pure Dart math core library"
+description: "Constructive real arithmetic math library"
 publish_to: "none"
 version: 0.1.0
 

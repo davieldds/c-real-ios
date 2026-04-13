@@ -41,6 +41,15 @@ void main() {
 
         expectErrorIsNotEmpty(root);
       });
+
+      test('sqrt of negative number reports specific error', () {
+        final root = sqrt(lit(-1));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 12);
+
+        expectError(root, 'Square root of negative value');
+      });
     });
 
     group('factorial', () {
@@ -80,6 +89,15 @@ void main() {
         expectErrorIsNotEmpty(root);
       });
 
+      test('factorial of negative integer reports specific error', () {
+        final root = fact(lit(-3));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 12);
+
+        expectError(root, 'Factorial is only defined for non-negative integers');
+      });
+
       test('factorial of non-integer reports error', () {
         final root = fact(lit(3.5));
         final tree = treeWith(root);
@@ -87,6 +105,15 @@ void main() {
         MathCore.evaluate(tree, 12);
 
         expectErrorIsNotEmpty(root);
+      });
+
+      test('factorial of non-integer reports specific error', () {
+        final root = fact(lit(3.5));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 12);
+
+        expectError(root, 'Factorial is only defined for integers');
       });
     });
 
@@ -99,7 +126,7 @@ void main() {
         MathCore.evaluate(tree, 12);
 
         expectValueWithinPrecision(inner, 24, 12);
-        expectValueWithinPrecision(root, 4.898979486, 12);
+        expectValueWithinPrecision(root, 4.898979485566, 12);
       });
 
       test('factorial(sqrt(9))', () {
@@ -134,6 +161,16 @@ void main() {
         MathCore.evaluate(tree, 10);
 
         expectErrorIsNotEmpty(root);
+      });
+
+      test('unary expression without argument reports specific error', () {
+        final root = sqrt(lit(4));
+        root.arg = null;
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 10);
+
+        expectError(root, 'Missing argument');
       });
     });
   });

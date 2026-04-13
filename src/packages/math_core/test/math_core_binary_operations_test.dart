@@ -146,8 +146,41 @@ void main() {
         expectValueWithinPrecision(root, 3.5, 12);
       });
 
+      test('rounds halves away from zero at precision 0 (positive)', () {
+        final left = lit(1.0);
+        final right = lit(2);
+        final root = div(left, right);
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 0);
+
+        expectValue(root, 1);
+      });
+
+      test('rounds halves away from zero at precision 0 (negative)', () {
+        final left = lit(-1.0);
+        final right = lit(2);
+        final root = div(left, right);
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 0);
+
+        expectValue(root, -1);
+      });
+
       test('division by zero records an error', () {
         final left = lit(10);
+        final right = lit(0);
+        final root = div(left, right);
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 12);
+
+        expectErrorIsNotEmpty(root);
+      });
+
+      test('division of zero by zero records an error', () {
+        final left = lit(0);
         final right = lit(0);
         final root = div(left, right);
         final tree = treeWith(root);
@@ -192,6 +225,17 @@ void main() {
         expectValueWithinPrecision(root, 0.125, 12);
       });
 
+      test('non-integer exponent reports error', () {
+        final left = lit(2);
+        final right = lit(0.5);
+        final root = pwr(left, right);
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 12);
+
+        expectError(root, 'Non-integer exponent');
+      });
+
       test('raises zero to a positive power', () {
         final left = lit(0);
         final right = lit(4);
@@ -228,6 +272,17 @@ void main() {
       test('raises zero to a negative power reports error', () {
         final left = lit(0);
         final right = lit(-2);
+        final root = pwr(left, right);
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 12);
+
+        expectErrorIsNotEmpty(root);
+      });
+
+      test('raises zero to zero power reports error', () {
+        final left = lit(0);
+        final right = lit(0);
         final root = pwr(left, right);
         final tree = treeWith(root);
 

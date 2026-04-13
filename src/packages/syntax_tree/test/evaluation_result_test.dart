@@ -3,10 +3,64 @@ import 'package:test/test.dart';
 
 void main() {
   group('EvaluationResult types', () {
-    test('RealResult formats value as mantissa e -scale', () {
-      final result = RealResult(mantissa: BigInt.from(12345), scale: 3);
+    test('RealResult correctly handles integers', () {
+      final result = RealResult(mantissa: BigInt.from(1), scale: 0);
 
-      expect(result.value, equals('12345e-3'));
+      expect(result.value, equals('1'));
+    });
+
+    test('RealResult correctly handles negative integers', () {
+      final result = RealResult(mantissa: BigInt.from(-3), scale: 0);
+
+      expect(result.value, equals('-3'));
+    });
+
+    test('RealResult correctly handles large integers', () {
+      final result = RealResult(mantissa: BigInt.parse('1'), scale: 2);
+
+      expect(result.value, equals('4'));
+    });
+
+    test('RealResult correctly handles negative large integers', () {
+      final result = RealResult(mantissa: BigInt.parse('-1'), scale: 2);
+
+      expect(result.value, equals('-4'));
+    });
+
+    test('RealResult correctly handles decimals', () {
+      final result = RealResult(mantissa: BigInt.from(5), scale: -2);
+
+      expect(result.value, equals('1.25'));
+    });
+
+    test('RealResult correctly handles negative decimals', () {
+      final result = RealResult(mantissa: BigInt.from(-5), scale: -2);
+
+      expect(result.value, equals('-1.25'));
+    });
+
+    test('RealResult correctly handles numbers between 0 and 1', () {
+      final result = RealResult(mantissa: BigInt.from(1), scale: -3);
+
+      expect(result.value, equals('0.125'));
+    });
+
+    test('RealResult correctly handles negative numbers between 0 and -1', () {
+      final result = RealResult(mantissa: BigInt.from(-1), scale: -3);
+
+      expect(result.value, equals('-0.125'));
+    });
+
+    test('RealResult correctly handles zero', () {
+      final result = RealResult(mantissa: BigInt.zero, scale: 0);
+
+      expect(result.value, equals('0'));
+    });
+
+    test('RealResult correctly handles zero with large scale', () {
+      final result = RealResult(mantissa: BigInt.zero, scale: -10);
+
+      expect(result.value, equals('0.0000000000'));
     });
 
     test('ErrorResult formats value with message', () {
