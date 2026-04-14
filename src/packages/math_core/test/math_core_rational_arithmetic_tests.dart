@@ -9,6 +9,7 @@ void main() {
   group('MathCore Rational Arithmetic', () {
     test('keeps literal as rational', () {
       final root = LiteralExpression(
+        equationForm: '1/2',
         value: RationalResult(
           numerator: BigInt.from(1),
           denominator: BigInt.from(2),
@@ -24,12 +25,14 @@ void main() {
     test('evaluates addition of two rationals', () {
       final root = add(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '1/3',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(3),
@@ -49,12 +52,14 @@ void main() {
     test('evaluates subtraction of two rationals', () {
       final root = sub(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '1/3',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(3),
@@ -74,12 +79,14 @@ void main() {
     test('evaluates multiplication of two rationals', () {
       final root = mul(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '1/3',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(3),
@@ -99,12 +106,14 @@ void main() {
     test('evaluates division of two rationals', () {
       final root = div(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '1/3',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(3),
@@ -124,12 +133,14 @@ void main() {
     test('does not crash on division by zero', () {
       final root = div(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '0/3',
           value: RationalResult(
             numerator: BigInt.zero,
             denominator: BigInt.from(3),
@@ -146,12 +157,14 @@ void main() {
     test('reports specific error on division by zero', () {
       final root = div(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '0/3',
           value: RationalResult(
             numerator: BigInt.zero,
             denominator: BigInt.from(3),
@@ -168,12 +181,14 @@ void main() {
     test('evaluates rational to the power of 0', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '0/1',
           value: RationalResult(
             numerator: BigInt.from(0),
             denominator: BigInt.from(1),
@@ -193,6 +208,7 @@ void main() {
     test('evaluates rational to the power of positive integer', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
@@ -213,12 +229,14 @@ void main() {
     test('evaluates rational to the power of negative integer', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '1/2',
           value: RationalResult(
             numerator: BigInt.from(1),
             denominator: BigInt.from(2),
           ),
         ),
         LiteralExpression(
+          equationForm: '-3/1',
           value: RationalResult(
             numerator: BigInt.from(-3),
             denominator: BigInt.from(1),
@@ -238,12 +256,14 @@ void main() {
     test('zero to the power of negative integer reports error', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '0/1',
           value: RationalResult(
             numerator: BigInt.zero,
             denominator: BigInt.from(1),
           ),
         ),
         LiteralExpression(
+          equationForm: '-3/1',
           value: RationalResult(
             numerator: BigInt.from(-3),
             denominator: BigInt.from(1),
@@ -260,12 +280,14 @@ void main() {
     test('zero to the power of negative integer reports specific error', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '0/1',
           value: RationalResult(
             numerator: BigInt.zero,
             denominator: BigInt.from(1),
           ),
         ),
         LiteralExpression(
+          equationForm: '-3/1',
           value: RationalResult(
             numerator: BigInt.from(-3),
             denominator: BigInt.from(1),
@@ -282,6 +304,7 @@ void main() {
     test('evaluates negative rational to even power', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '-1/2',
           value: RationalResult(
             numerator: BigInt.from(-1),
             denominator: BigInt.from(2),
@@ -302,6 +325,7 @@ void main() {
     test('evaluates negative rational to odd power', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '-1/2',
           value: RationalResult(
             numerator: BigInt.from(-1),
             denominator: BigInt.from(2),
@@ -322,9 +346,11 @@ void main() {
     test('positive real base to rational power of 0 is rational', () {
       final root = pwr(
         LiteralExpression(
+          equationForm: '1',
           value: RealResult(mantissa: BigInt.from(1), scale: 0),
         ),
         LiteralExpression(
+          equationForm: '0/1',
           value: RationalResult(
             numerator: BigInt.from(0),
             denominator: BigInt.from(1),

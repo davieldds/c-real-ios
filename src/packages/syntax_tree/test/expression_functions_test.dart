@@ -23,6 +23,7 @@ void main() {
     late LiteralExpression nextExpression;
     setUp(() {
       nextExpression = LiteralExpression(
+        equationForm: '69',
         value: RationalResult(
           numerator: BigInt.from(69),
           denominator: BigInt.one,

@@ -10,15 +10,15 @@ import 'package:test/test.dart';
 
 SyntaxTree treeWith(Expression root) => SyntaxTree(root);
 
-LiteralExpression lit(num? value, {Expression? parent}) {
-  return LiteralExpression(parent: parent, value: _evalValueFromNum(value));
+LiteralExpression lit(num value, {Expression? parent}) {
+  return LiteralExpression(
+    parent: parent,
+    equationForm: value.toString(),
+    value: _evalValueFromNum(value),
+  );
 }
 
-EvaluationResult? _evalValueFromNum(num? value) {
-  if (value == null) {
-    return null;
-  }
-
+EvaluationResult _evalValueFromNum(num value) {
   if (value is int) {
     return RationalResult(
       numerator: BigInt.from(value),

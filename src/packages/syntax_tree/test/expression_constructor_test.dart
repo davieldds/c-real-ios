@@ -35,7 +35,7 @@ void main() {
         numerator: BigInt.from(67),
         denominator: BigInt.one,
       );
-      final expr = LiteralExpression(value: value);
+      final expr = LiteralExpression(equationForm: '67', value: value);
 
       expect(expr.value, same(value));
       expect(expr.parent, isNull);
@@ -46,15 +46,18 @@ void main() {
         numerator: BigInt.from(-67),
         denominator: BigInt.one,
       );
-      final expr = LiteralExpression(value: value);
+      final expr = LiteralExpression(equationForm: '-67', value: value);
 
       expect(expr.value, same(value));
       expect(expr.parent, isNull);
     });
 
     test('Float', () {
-      final value = RealResult(mantissa: BigInt.from(6769), scale: 2);
-      final expr = LiteralExpression(value: value);
+      final value = RationalResult(
+        numerator: BigInt.from(6769),
+        denominator: BigInt.from(100),
+      );
+      final expr = LiteralExpression(equationForm: '67.69', value: value);
 
       expect(expr.value, same(value));
       expect(expr.parent, isNull);
@@ -67,12 +70,14 @@ void main() {
 
     setUp(() {
       arg1 = LiteralExpression(
+        equationForm: '69',
         value: RationalResult(
           numerator: BigInt.from(69),
           denominator: BigInt.one,
         ),
       );
       arg2 = LiteralExpression(
+        equationForm: '420',
         value: RationalResult(
           numerator: BigInt.from(420),
           denominator: BigInt.one,

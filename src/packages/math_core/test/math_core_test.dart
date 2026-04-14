@@ -14,6 +14,7 @@ void main() {
 
     test('does not replace root expression', () {
       final root = LiteralExpression(
+        equationForm: '42',
         value: RationalResult(
           numerator: BigInt.from(42),
           denominator: BigInt.one,
@@ -28,6 +29,7 @@ void main() {
 
     test('evaluates literal expression without throwing', () {
       final root = LiteralExpression(
+        equationForm: '3.14',
         value: RealResult(mantissa: BigInt.from(314), scale: 2),
       );
       final tree = SyntaxTree(root);
@@ -36,7 +38,10 @@ void main() {
     });
 
     test('does not throw when literal has existing evaluation result', () {
-      final root = LiteralExpression(value: ErrorResult('custom error'));
+      final root = LiteralExpression(
+        equationForm: 'custom error',
+        value: ErrorResult('custom error'),
+      );
       final tree = SyntaxTree(root);
 
       expect(() => MathCore.evaluate(tree, 12), returnsNormally);

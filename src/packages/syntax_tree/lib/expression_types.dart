@@ -1,7 +1,9 @@
 import 'package:syntax_tree/expression.dart';
 
 class LiteralExpression extends Expression {
-  LiteralExpression({super.parent, super.value});
+  late String equationForm;
+
+  LiteralExpression({super.parent, required this.equationForm, super.value});
 }
 
 class AddExpression extends BinaryExpression {
