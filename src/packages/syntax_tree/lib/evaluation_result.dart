@@ -21,12 +21,20 @@ abstract class EvaluationResult {
 /// - 1.25 would be represented as mantissa = 0b101 and scale = -2
 /// - 2 would be represented as mantissa = 0b1 and scale = 1
 ///
-/// The [value] getter returns the string representation of the real number using . as the decimal place separator
+/// The [value] getter returns the string representation of the real number using . as the decimal place separator.
+/// The number of digits after the decimal point is determined by [precision], which is the number of digits considered
+/// to be correct in base 10.
 class RealResult extends EvaluationResult {
   BigInt mantissa;
   int scale;
 
-  RealResult({required this.mantissa, required this.scale});
+  int precision;
+
+  RealResult({
+    required this.mantissa,
+    required this.scale,
+    required this.precision,
+  });
 
   @override
   String get value {
@@ -39,24 +47,55 @@ class RealResult extends EvaluationResult {
     // the mantissa by 5^-scale, convert to base 10 and then shift it to the right by -scale to get the integer part
     // and the fractional part.
 
-    // Multiply the mantissa by 5^-scale
-    final decimalMantissa = mantissa * BigInt.from(5).pow(-scale);
-
-    // Convert the decimal mantissa to a string in base 10
-    final decimalString = decimalMantissa.abs().toString();
-
-    // Pad with leading zeros if necessary
-    final paddedString = decimalString.padLeft(-scale + 1, '0');
-
-    // Split the string into the integer part and the fractional part
-    final integerPart = paddedString.substring(0, paddedString.length + scale);
-    final fractionalPart = paddedString.substring(paddedString.length + scale);
-
-    // Add the sign back if the mantissa is negative
     final sign = mantissa < BigInt.zero ? '-' : '';
+    final absMantissa = mantissa.abs();
 
-    // Stitch the integer part and the fractional part together with a decimal point
-    return '$sign$integerPart.$fractionalPart';
+    // Multiply the mantissa by 5^-scale
+    final decimalMantissa = absMantissa * BigInt.from(5).pow(-scale);
+    final totalFractionDigits = -scale;
+
+    // If we need fewer digits than the exact fractional length, round to the requested precision.
+    if (precision < totalFractionDigits) {
+      final drop = totalFractionDigits - precision;
+      final divisor = BigInt.from(10).pow(drop);
+
+      var rounded = decimalMantissa ~/ divisor;
+      final remainder = decimalMantissa.remainder(divisor);
+
+      // Round to nearest integer (half away from zero).
+      if (remainder * BigInt.from(2) >= divisor) {
+        rounded += BigInt.one;
+      }
+
+      final roundedString = rounded.toString();
+      if (precision == 0) {
+        return '$sign$roundedString';
+      }
+
+      final padded = roundedString.padLeft(precision + 1, '0');
+      final integerPart = padded.substring(0, padded.length - precision);
+      final fractionalPart = padded.substring(padded.length - precision);
+      return '$sign$integerPart.$fractionalPart';
+    }
+
+    // Otherwise, format the full fractional part and pad with zeros if needed.
+    final decimalString = decimalMantissa.toString();
+    final paddedString = decimalString.padLeft(totalFractionDigits + 1, '0');
+    final integerPart = paddedString.substring(
+      0,
+      paddedString.length - totalFractionDigits,
+    );
+    var fractionalPart = paddedString.substring(
+      paddedString.length - totalFractionDigits,
+    );
+
+    if (precision > totalFractionDigits) {
+      fractionalPart = fractionalPart.padRight(precision, '0');
+    }
+
+    return precision == 0
+        ? '$sign$integerPart'
+        : '$sign$integerPart.$fractionalPart';
   }
 
   @override
@@ -71,13 +110,13 @@ class RealResult extends EvaluationResult {
 /// the rational number can be converted to a real number by performing the division of the [numerator] by the [denominator] and adjusting the [mantissa] and [scale] accordingly.
 /// By default, the [mantissa] and [scale] are set to 0 and are only calculated when necessary.
 ///
-/// The [value] getter returns a string in the form of "numerator/denominator".
+/// The [value] getter returns a string in the form of "numerator/denominator" or just "numerator" if the denominator is 1.
 class RationalResult extends RealResult {
   BigInt numerator;
   BigInt denominator;
 
   RationalResult({required this.numerator, required this.denominator})
-    : super(mantissa: BigInt.zero, scale: 0) {
+    : super(mantissa: BigInt.zero, scale: 0, precision: 0) {
     // Check for division by zero
     if (denominator == BigInt.zero) {
       throw ArgumentError('Denominator cannot be zero');
@@ -96,7 +135,9 @@ class RationalResult extends RealResult {
   }
 
   @override
-  String get value => '$numerator/$denominator';
+  String get value =>
+      denominator == BigInt.one ? "$numerator" : "$numerator/$denominator";
+  String get decimalValue => super.value;
 
   @override
   bool get isInteger => denominator == BigInt.one;

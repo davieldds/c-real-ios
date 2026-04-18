@@ -1,4 +1,5 @@
 import 'package:math_core/error_budgeting.dart';
+import 'package:math_core/literals.dart';
 import 'package:math_core/rational_approximation.dart';
 import 'package:math_core/rational_math.dart';
 import 'package:math_core/real_math.dart';
@@ -8,8 +9,8 @@ import 'package:syntax_tree/syntax_tree.dart';
 import 'package:syntax_tree/evaluation_result.dart';
 
 /// MathCore is a math library that evaluates the value of each node in a given syntax tree.
-/// It uses constructive real arithmetic to guarantee maximum error of 1 in the last evaluated decimal place.
-
+/// It uses constructive real arithmetic to guarantee a upper bound on the error of the final result
+///
 /// This implementation is heavily inspired by the modified version of the calculator developed by
 /// Hans-J. Boehm at SGI ([https://www.hboehm.info/new_crcalc/CRCalc.html])
 class MathCore {
@@ -17,13 +18,29 @@ class MathCore {
 
   /// Evaluates the value of the given syntax [tree] to the specified [precision] and also the intermediate results
   /// of each node to the precision required for the calculation.
+  ///
+  /// The result is guaranteed to be within 10^-[precision] of the true value (meaning the first [precision] digits
+  /// after the decimal point are most likely correct (see note))
+  ///
   /// Nothing is returned, instead the results/errors are stored in the nodes themselves.
+  ///
+  /// Note: The error bound will be always correct, but in some cases the digits might change during more precise recomputation.
+  /// For example:
+  /// 1.0000 is within 10^-4 of 0.99999, but it is the closest decimal representation of the true value, so the result is
+  /// correct even if counterintuitive.
   static void evaluate(SyntaxTree tree, int precision) {
-    /// If the tree is empty, there's nothing to evaluate
+    // If the tree is empty, there's nothing to evaluate
     if (tree.root == null) return;
 
-    /// Start the recursive evaluation from the root node
+    // Start the recursive evaluation from the root node
     evaluateExpression(tree.root!, precision);
+
+    // If the final result is a RationalResult, we also need to approximate it to the required precision
+    if (tree.root!.value is RationalResult)
+      approximateRationalToPrecision(
+        tree.root!.value as RationalResult,
+        precision,
+      );
   }
 
   /// Recursively evaluates the value of the given [expression] to the specified [precision].
@@ -57,27 +74,17 @@ class MathCore {
 
   /// Helper function that evaluates a [literal] expression to the specified [precision].
   static void _handleLiteral(LiteralExpression literal, int precision) {
-    // TODO: Implement irrational literals (e.g. pi, e)
-
-    if (literal.value == null) {
-      literal.value = ErrorResult('Invalid literal');
+    // Check that the literal has a valid equation form
+    if (literal.equationForm == "") {
+      literal.value = ErrorResult('Empty literal');
       return;
     }
 
-    if (literal.value is RationalResult) {
-      approximateRationalToPrecision(
-        literal.value as RationalResult,
-        precision,
-      );
-    } else if (literal.value is RealResult) {
-      final realResult = literal.value as RealResult;
-      if (realResult.scale < precision) {
-        realResult.mantissa *= BigInt.from(
-          10,
-        ).pow(precision - realResult.scale);
-        realResult.scale = precision;
-      }
-    }
+    // Based on the type of the literal, pick the appropriate logic for evaluating its value
+    if (Literals.isIrrationalLiteral(literal))
+      Literals.evaluateIrrationalLiteral(literal, precision);
+    else
+      Literals.evaluateRationalLiteral(literal);
   }
 
   /// Helper function that evaluates a [unary] expression to the specified [precision].

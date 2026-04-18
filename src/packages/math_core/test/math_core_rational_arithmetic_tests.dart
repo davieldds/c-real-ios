@@ -1,370 +1,145 @@
-import 'package:math_core/math_core.dart';
-import 'package:syntax_tree/evaluation_result.dart';
-import 'package:syntax_tree/expression_types.dart';
-import 'package:test/test.dart';
+import "package:math_core/math_core.dart";
+import "package:syntax_tree/evaluation_result.dart";
+import "package:test/test.dart";
 
-import 'helpers.dart';
+import "helpers.dart";
 
 void main() {
-  group('MathCore Rational Arithmetic', () {
-    test('keeps literal as rational', () {
-      final root = LiteralExpression(
-        equationForm: '1/2',
-        value: RationalResult(
-          numerator: BigInt.from(1),
-          denominator: BigInt.from(2),
-        ),
-      );
+  group("MathCore Rational Arithmetic", () {
+    test("evaluates addition of two rationals", () {
+      final root = add(lit("0.5"), lit("0.3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
+      expectValue(root, "4/5");
+      expectDecimalValue(root, "0.8000");
     });
 
-    test('evaluates addition of two rationals', () {
-      final root = add(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '1/3',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(3),
-          ),
-        ),
-      );
+    test("evaluates subtraction of two rationals", () {
+      final root = sub(lit("0.5"), lit("0.3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(5));
-      expect(result.denominator, BigInt.from(6));
+      expectValue(root, "1/5");
+      expectDecimalValue(root, "0.2000");
     });
 
-    test('evaluates subtraction of two rationals', () {
-      final root = sub(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '1/3',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(3),
-          ),
-        ),
-      );
+    test("evaluates multiplication of two rationals", () {
+      final root = mul(lit("0.5"), lit("0.3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(1));
-      expect(result.denominator, BigInt.from(6));
+      expectValue(root, "3/20");
+      expectDecimalValue(root, "0.1500");
     });
 
-    test('evaluates multiplication of two rationals', () {
-      final root = mul(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '1/3',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(3),
-          ),
-        ),
-      );
+    test("evaluates division of two rationals", () {
+      final root = div(lit("0.5"), lit("0.3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(1));
-      expect(result.denominator, BigInt.from(6));
+      expectValue(root, "5/3");
+      expectDecimalValue(root, "1.6666");
     });
 
-    test('evaluates division of two rationals', () {
-      final root = div(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '1/3',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(3),
-          ),
-        ),
-      );
+    test("does not crash on division by zero", () {
+      final root = div(lit("0.5"), lit("0.3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
-
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(3));
-      expect(result.denominator, BigInt.from(2));
-    });
-
-    test('does not crash on division by zero', () {
-      final root = div(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '0/3',
-          value: RationalResult(
-            numerator: BigInt.zero,
-            denominator: BigInt.from(3),
-          ),
-        ),
-      );
-      final tree = treeWith(root);
-
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
       expect(root.value, isA<ErrorResult>());
     });
 
-    test('reports specific error on division by zero', () {
-      final root = div(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '0/3',
-          value: RationalResult(
-            numerator: BigInt.zero,
-            denominator: BigInt.from(3),
-          ),
-        ),
-      );
+    test("reports specific error on division by zero", () {
+      final root = div(lit("0.5"), lit("0.3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expectError(root, 'Division by zero');
+      expectError(root, "Division by zero");
     });
 
-    test('evaluates rational to the power of 0', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '0/1',
-          value: RationalResult(
-            numerator: BigInt.from(0),
-            denominator: BigInt.from(1),
-          ),
-        ),
-      );
+    test("evaluates rational to the power of 0", () {
+      final root = pwr(lit("0.5"), lit("0.0"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(1));
-      expect(result.denominator, BigInt.from(1));
+      expectValue(root, "1");
+      expectDecimalValue(root, "1.0000");
     });
 
-    test('evaluates rational to the power of positive integer', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        lit(3),
-      );
+    test("evaluates rational to the power of positive integer", () {
+      final root = pwr(lit("0.5"), lit("3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(1));
-      expect(result.denominator, BigInt.from(8));
+      expectValue(root, "1/8");
+      expectDecimalValue(root, "0.1250");
     });
 
-    test('evaluates rational to the power of negative integer', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '1/2',
-          value: RationalResult(
-            numerator: BigInt.from(1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '-3/1',
-          value: RationalResult(
-            numerator: BigInt.from(-3),
-            denominator: BigInt.from(1),
-          ),
-        ),
-      );
+    test("evaluates rational to the power of negative integer", () {
+      final root = pwr(lit("0.5"), sub(lit("0"), lit("3")));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(8));
-      expect(result.denominator, BigInt.from(1));
+      expectValue(root, "8");
+      expectDecimalValue(root, "8.0000");
     });
 
-    test('zero to the power of negative integer reports error', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '0/1',
-          value: RationalResult(
-            numerator: BigInt.zero,
-            denominator: BigInt.from(1),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '-3/1',
-          value: RationalResult(
-            numerator: BigInt.from(-3),
-            denominator: BigInt.from(1),
-          ),
-        ),
-      );
+    test("zero to the power of negative integer reports error", () {
+      final root = pwr(lit("0"), sub(lit("0"), lit("3")));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
       expect(root.value, isA<ErrorResult>());
     });
 
-    test('zero to the power of negative integer reports specific error', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '0/1',
-          value: RationalResult(
-            numerator: BigInt.zero,
-            denominator: BigInt.from(1),
-          ),
-        ),
-        LiteralExpression(
-          equationForm: '-3/1',
-          value: RationalResult(
-            numerator: BigInt.from(-3),
-            denominator: BigInt.from(1),
-          ),
-        ),
-      );
+    test("zero to the power of negative integer reports specific error", () {
+      final root = pwr(lit("0"), sub(lit("0"), lit("3")));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expectError(root, 'Zero cannot be raised to a non-positive power');
+      expectError(root, "Zero cannot be raised to a non-positive power");
     });
 
-    test('evaluates negative rational to even power', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '-1/2',
-          value: RationalResult(
-            numerator: BigInt.from(-1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        lit(2),
-      );
+    test("evaluates negative rational to even power", () {
+      final root = pwr(sub(lit("0"), lit("0.5")), lit("2"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(1));
-      expect(result.denominator, BigInt.from(4));
+      expectValue(root, "1/4");
+      expectDecimalValue(root, "0.2500");
     });
 
-    test('evaluates negative rational to odd power', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '-1/2',
-          value: RationalResult(
-            numerator: BigInt.from(-1),
-            denominator: BigInt.from(2),
-          ),
-        ),
-        lit(3),
-      );
+    test("evaluates negative rational to odd power", () {
+      final root = pwr(sub(lit("0"), lit("0.5")), lit("3"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(-1));
-      expect(result.denominator, BigInt.from(8));
+      expectValue(root, "-1/8");
+      expectDecimalValue(root, "-0.1250");
     });
 
-    test('positive real base to rational power of 0 is rational', () {
-      final root = pwr(
-        LiteralExpression(
-          equationForm: '1',
-          value: RealResult(mantissa: BigInt.from(1), scale: 0),
-        ),
-        LiteralExpression(
-          equationForm: '0/1',
-          value: RationalResult(
-            numerator: BigInt.from(0),
-            denominator: BigInt.from(1),
-          ),
-        ),
-      );
+    test("positive real base to rational power of 0 is rational", () {
+      final root = pwr(lit("pi"), lit("0.0"));
       final tree = treeWith(root);
 
-      MathCore.evaluate(tree, 12);
+      MathCore.evaluate(tree, 4);
 
-      expect(root.value, isA<RationalResult>());
-      final result = root.value as RationalResult;
-      expect(result.numerator, BigInt.from(1));
-      expect(result.denominator, BigInt.from(1));
+      expectValue(root, "1");
+      expectDecimalValue(root, "1.0000");
     });
   });
 }

@@ -1,371 +1,297 @@
-import 'package:math_core/math_core.dart';
-import 'package:syntax_tree/expression.dart';
-import 'package:syntax_tree/expression_types.dart';
-import 'package:test/test.dart';
+import "package:math_core/math_core.dart";
+import "package:syntax_tree/expression_types.dart";
+import "package:test/test.dart";
 
-import 'helpers.dart';
+import "helpers.dart";
 
 void main() {
-  group('MathCore binary operations', () {
-    group('addition', () {
-      test('adds two positive integers', () {
-        final left = lit(2);
-        final right = lit(3);
-        final root = add(left, right);
+  group("MathCore binary operations", () {
+    group("addition", () {
+      test("adds two positive integers", () {
+        final root = add(lit("2.0"), lit("3.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 8);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 5, 8);
+        expectValueOneOf(root, ["5", "5.0000"]);
       });
 
-      test('adds a negative and a positive integer', () {
-        final left = lit(-4);
-        final right = lit(10);
-        final root = add(left, right);
+      test("adds a negative and a positive integer", () {
+        final root = add(sub(lit("0.0"), lit("4.0")), lit("10.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 8);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 6, 8);
+        expectValueOneOf(root, ["6", "6.0000"]);
       });
 
-      test('adds floating point values', () {
-        final left = lit(2.5);
-        final right = lit(3.25);
-        final root = add(left, right);
+      test("add decimal values", () {
+        final root = add(lit("2.5"), lit("3.25"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 5.75, 12);
+        expectValueOneOf(root, ["23/4", "5.7500"]);
       });
     });
 
-    group('subtraction', () {
-      test('subtracts two positive integers', () {
-        final left = lit(10);
-        final right = lit(3);
-        final root = sub(left, right);
+    group("subtraction", () {
+      test("subtracts two positive integers", () {
+        final root = sub(lit("10.0"), lit("3.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 8);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 7, 8);
+        expectValueOneOf(root, ["7", "7.0000"]);
       });
 
-      test('subtracts resulting in negative', () {
-        final left = lit(2);
-        final right = lit(9);
-        final root = sub(left, right);
+      test("subtracts resulting in negative", () {
+        final root = sub(lit("3.0"), lit("10.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 8);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, -7, 8);
+        expectValueOneOf(root, ["-7", "-7.0000"]);
       });
 
-      test('subtracts floating point values', () {
-        final left = lit(10.5);
-        final right = lit(3.2);
-        final root = sub(left, right);
+      test("subtracts decimal values", () {
+        final root = sub(lit("10.5"), lit("3.2"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 7.3, 12);
+        expectValueOneOf(root, ["73/10", "7.3000"]);
       });
     });
 
-    group('multiplication', () {
-      test('multiplies two positive integers', () {
-        final left = lit(6);
-        final right = lit(7);
-        final root = mul(left, right);
+    group("multiplication", () {
+      test("multiplies two positive integers", () {
+        final root = mul(lit("6.0"), lit("7.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 8);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 42, 8);
+        expectValueOneOf(root, ["42", "42.0000"]);
       });
 
-      test('multiplies by zero', () {
-        final left = lit(123);
-        final right = lit(0);
-        final root = mul(left, right);
+      test("multiplies by zero", () {
+        final root = mul(lit("10.0"), lit("0.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 8);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 0, 8);
+        expectValueOneOf(root, ["0", "0.0000"]);
       });
 
-      test('multiplies negatives', () {
-        final left = lit(-3);
-        final right = lit(-5);
-        final root = mul(left, right);
+      test("multiplies negatives", () {
+        final root = mul(
+          sub(lit("0.0"), lit("3.0")),
+          sub(lit("0.0"), lit("5.0")),
+        );
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 8);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 15, 8);
+        expectValueOneOf(root, ["15", "15.0000"]);
       });
 
-      test('multiplies floating point values', () {
-        final left = lit(2.5);
-        final right = lit(4);
-        final root = mul(left, right);
+      test("multiplies decimal values", () {
+        final root = mul(lit("1.5"), lit("2.5"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 10.0, 12);
+        expectValueOneOf(root, ["15/4", "3.7500"]);
       });
     });
 
-    group('division', () {
-      test('divides two positive integers', () {
-        final left = lit(10);
-        final right = lit(2);
-        final root = div(left, right);
+    group("division", () {
+      test("divides two positive integers", () {
+        final root = div(lit("10.0"), lit("2.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 5, 12);
+        expectValueOneOf(root, ["5", "5.0000"]);
       });
 
-      test('divides resulting in fractional value', () {
-        final left = lit(7);
-        final right = lit(2);
-        final root = div(left, right);
+      test("divides resulting in fractional value", () {
+        final root = div(lit("7.0"), lit("2.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 3.5, 12);
+        expectValueOneOf(root, ["7/2", "3.5000"]);
       });
 
-      test('rounds halves away from zero at precision 0 (positive)', () {
-        final left = lit(1.0);
-        final right = lit(2);
-        final root = div(left, right);
+      test("division by zero records an error", () {
+        final root = div(lit("10.0"), lit("0.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 0);
-
-        expectValue(root, 1);
-      });
-
-      test('rounds halves away from zero at precision 0 (negative)', () {
-        final left = lit(-1.0);
-        final right = lit(2);
-        final root = div(left, right);
-        final tree = treeWith(root);
-
-        MathCore.evaluate(tree, 0);
-
-        expectValue(root, -1);
-      });
-
-      test('division by zero records an error', () {
-        final left = lit(10);
-        final right = lit(0);
-        final root = div(left, right);
-        final tree = treeWith(root);
-
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(root);
       });
 
-      test('division of zero by zero records an error', () {
-        final left = lit(0);
-        final right = lit(0);
-        final root = div(left, right);
+      test("division of zero by zero records an error", () {
+        final root = div(lit("0.0"), lit("0.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(root);
       });
     });
 
-    group('power', () {
-      test('raises to a positive integer power', () {
-        final left = lit(2);
-        final right = lit(3);
-        final root = pwr(left, right);
+    group("power", () {
+      test("raises to a positive integer power", () {
+        final root = pwr(lit("2.0"), lit("3.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 8, 12);
+        expectValueOneOf(root, ["8", "8.0000"]);
       });
 
-      test('raises to zero power', () {
-        final left = lit(5);
-        final right = lit(0);
-        final root = pwr(left, right);
+      test("raises to zero power", () {
+        final root = pwr(lit("2.0"), lit("0.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 1, 12);
+        expectValueOneOf(root, ["1", "1.0000"]);
       });
 
-      test('raises to a negative integer power', () {
-        final left = lit(2);
-        final right = lit(-3);
-        final root = pwr(left, right);
+      test("raises to a negative integer power", () {
+        final root = pwr(lit("2.0"), sub(lit("0.0"), lit("3.0")));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 0.125, 12);
+        expectValueOneOf(root, ["1/8", "0.1250"]);
       });
 
-      test('non-integer exponent reports error', () {
-        final left = lit(2);
-        final right = lit(0.5);
-        final root = pwr(left, right);
+      test("raises to a non-integer power", () {
+        final root = pwr(lit("9.0"), lit("0.5"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectError(root, 'Non-integer exponent');
+        expectValueOneOf(root, ["3", "3.0000"]);
       });
 
-      test('raises zero to a positive power', () {
-        final left = lit(0);
-        final right = lit(4);
-        final root = pwr(left, right);
+      test("raises to irrational power", () {
+        final root = pwr(pwr(lit("2.0"), sqrt(lit("2.0"))), sqrt(lit("2.0")));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 0, 12);
+        expectValueOneOf(root, ["4", "4.0000"]);
       });
 
-      test('raises a negative base to an odd power', () {
-        final left = lit(-2);
-        final right = lit(3);
-        final root = pwr(left, right);
+      test("raises zero to a positive power", () {
+        final root = pwr(lit("0.0"), lit("3.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, -8, 12);
+        expectValueOneOf(root, ["0", "0.0000"]);
       });
 
-      test('raises a negative base to an even power', () {
-        final left = lit(-2);
-        final right = lit(4);
-        final root = pwr(left, right);
+      test("raises a negative base to an odd power", () {
+        final root = pwr(sub(lit("0.0"), lit("2.0")), lit("3.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(root, 16, 12);
+        expectValueOneOf(root, ["-8", "-8.0000"]);
       });
 
-      test('raises zero to a negative power reports error', () {
-        final left = lit(0);
-        final right = lit(-2);
-        final root = pwr(left, right);
+      test("raises a negative base to an even power", () {
+        final root = pwr(sub(lit("0.0"), lit("2.0")), lit("4.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
+
+        expectValueOneOf(root, ["16", "16.0000"]);
+      });
+
+      test("raises a negative to a non-integer power reports error", () {
+        final root = pwr(sub(lit("0.0"), lit("2.0")), lit("0.5"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(root);
       });
 
-      test('raises zero to zero power reports error', () {
-        final left = lit(0);
-        final right = lit(0);
-        final root = pwr(left, right);
+      test("raises zero to a negative power reports error", () {
+        final root = pwr(lit("0.0"), sub(lit("0.0"), lit("3.0")));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
+
+        expectErrorIsNotEmpty(root);
+      });
+
+      test("raises zero to zero power reports error", () {
+        final root = pwr(lit("0.0"), lit("0.0"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(root);
       });
     });
 
-    group('nested binary expressions', () {
-      test('evaluates a mixed tree left-to-right', () {
-        final left = add(lit(1), lit(2));
-        final root = mul(left, lit(3));
+    group("nested binary expressions", () {
+      test("evaluates a mixed tree left-to-right", () {
+        final root = mul(add(lit("1.0"), lit("2.0")), lit("3.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
-        expectValueWithinPrecision(left, 3, 12);
-        expectValueWithinPrecision(root, 9, 12);
+        expectValueOneOf(root, ["9", "9.0000"]);
       });
 
-      test('propagates errors from child expressions', () {
-        final left = div(lit(1), lit(0));
-        final root = add(left, lit(2));
+      test("propagates errors from child expressions", () {
+        final left = div(lit("1.0"), lit("0.0"));
+        final root = add(left, lit("2.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 12);
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(left);
         expectIndeterminate(root);
       });
     });
 
-    group('missing arguments', () {
-      test('binary expression without left argument reports error', () {
-        final root = AddExpression(rightArg: lit(1));
+    group("missing arguments", () {
+      test("binary expression without left argument reports error", () {
+        final root = AddExpression(rightArg: lit("1.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 10);
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(root);
       });
 
-      test('binary expression without right argument reports error', () {
-        final root = AddExpression(leftArg: lit(1));
+      test("binary expression without right argument reports error", () {
+        final root = AddExpression(leftArg: lit("1.0"));
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 10);
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(root);
       });
 
-      test('binary expression without any arguments reports error', () {
+      test("binary expression without any arguments reports error", () {
         final root = AddExpression();
         final tree = treeWith(root);
 
-        MathCore.evaluate(tree, 10);
+        MathCore.evaluate(tree, 4);
 
         expectErrorIsNotEmpty(root);
-      });
-    });
-
-    group('parent relationships', () {
-      test('does not require parent to evaluate correctly', () {
-        final root = mul(lit(4), lit(5));
-        final tree = treeWith(root);
-
-        MathCore.evaluate(tree, 8);
-
-        expectValueWithinPrecision(root, 20, 8);
-      });
-
-      test('respects explicit parent links during evaluation', () {
-        final root = add(lit(2), lit(2));
-        final tree = treeWith(root);
-        root.leftArg?.parent = root;
-        root.rightArg?.parent = root;
-
-        MathCore.evaluate(tree, 8);
-
-        expectParent(root.leftArg as Expression, root);
-        expectParent(root.rightArg as Expression, root);
-        expectValueWithinPrecision(root, 4, 8);
       });
     });
   });

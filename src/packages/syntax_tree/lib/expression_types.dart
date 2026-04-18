@@ -1,6 +1,11 @@
 import 'package:syntax_tree/expression.dart';
 
 class LiteralExpression extends Expression {
+  /// The string representation of the literal, e.g. "1", "0.5", "pi", "e", etc.
+  /// Decimal separator is a dot, thousands separator isn't used.
+  /// Whole numbers must be represented with a decimal point, e.g. "1" must be represented as "1.0".
+  /// Numbers between 0 and 1 must have a leading zero, e.g. "0.5" instead of ".5".
+  /// Literal expressions can't be negative
   late String equationForm;
 
   LiteralExpression({super.parent, required this.equationForm, super.value});

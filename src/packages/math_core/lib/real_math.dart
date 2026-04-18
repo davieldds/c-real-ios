@@ -93,6 +93,7 @@ class RealMath {
     expression.value = RealResult(
       mantissa: _scaleMantissa(leftM + rightM, targetScale, precision),
       scale: precision,
+      precision: 0,
     );
   }
 
@@ -114,6 +115,7 @@ class RealMath {
     expression.value = RealResult(
       mantissa: _scaleMantissa(leftM - rightM, targetScale, precision),
       scale: precision,
+      precision: 0,
     );
   }
 
@@ -136,6 +138,7 @@ class RealMath {
     expression.value = RealResult(
       mantissa: _scaleMantissa(mul, targetScale + targetScale, precision),
       scale: precision,
+      precision: 0,
     );
   }
 
@@ -162,6 +165,7 @@ class RealMath {
     expression.value = RealResult(
       mantissa: _scaleMantissa(div, targetScale, precision),
       scale: precision,
+      precision: 0,
     );
   }
 
@@ -218,6 +222,7 @@ class RealMath {
       expression.value = RealResult(
         mantissa: _scaleMantissa(resM, targetScale, precision),
         scale: precision,
+        precision: 0,
       );
     } else {
       final targetScale = precision + 2;
@@ -230,6 +235,7 @@ class RealMath {
       expression.value = RealResult(
         mantissa: _scaleMantissa(res, targetScale * expVal, precision),
         scale: precision,
+        precision: 0,
       );
     }
   }
@@ -275,6 +281,7 @@ class RealMath {
     expression.value = RealResult(
       mantissa: _scaleMantissa(rootMantissa, targetScale, precision),
       scale: precision,
+      precision: 0,
     );
   }
 
@@ -317,6 +324,7 @@ class RealMath {
     expression.value = RealResult(
       mantissa: _scaleMantissa(fact, 0, precision),
       scale: precision,
+      precision: 0,
     );
   }
 }

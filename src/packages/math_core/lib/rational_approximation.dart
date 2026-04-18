@@ -1,58 +1,25 @@
 import 'package:syntax_tree/evaluation_result.dart';
 
-/// Divides [dividend] by [divisor] and rounds to nearest, halves away from zero.
-BigInt _roundDiv(BigInt dividend, BigInt divisor) {
-  final quotient = dividend ~/ divisor;
-  final rem = dividend % divisor;
-  final absRem = rem.abs();
-  final absDiv = divisor.abs();
-
-  final shouldRoundUp = absRem * BigInt.from(2) >= absDiv;
-  if (!shouldRoundUp) {
-    return quotient;
-  }
-
-  final negativeResult = dividend.isNegative != divisor.isNegative;
-  return negativeResult ? quotient - BigInt.one : quotient + BigInt.one;
-}
-
 /// Approximates [rational] to the requested decimal [precision].
-/// Uses cached mantissa/scale when possible to avoid recomputation.
 void approximateRationalToPrecision(RationalResult rational, int precision) {
-  if (precision < 0) {
-    precision = 0;
-  }
+  if (precision < 0)
+    throw ArgumentError("Precision must be non-negative, got $precision");
 
-  /// If we've already approximated beyond this precision, round cached mantissa down.
-  /// For zero precision, only skip when mantissa has been computed.
-  if (rational.scale > precision) {
-    final scaleDiff = rational.scale - precision;
-    final divisor = BigInt.from(10).pow(scaleDiff);
-    rational.mantissa = _roundDiv(rational.mantissa, divisor);
-    rational.scale = precision;
-    return;
-  }
-  if (rational.scale == precision) {
-    if (precision > 0) {
-      return;
-    }
-    if (rational.mantissa != BigInt.zero || rational.numerator == BigInt.zero) {
-      return;
-    }
-  }
+  // We need enough binary digits to round correctly to `precision` decimal
+  // digits. Since log2(10) ≈ 3.3219, we use 4 bits per decimal digit plus
+  // guard bits to avoid off-by-one in the least significant decimal digit.
+  final scale = -(precision * 4 + 8);
 
-  final currentScale = rational.scale;
-  final extraScale = precision - currentScale;
-  final extraFactor = BigInt.from(10).pow(extraScale);
-  final currentScaleFactor = BigInt.from(10).pow(currentScale);
+  final scaledNumerator = rational.numerator << (-scale);
 
-  final remainder =
-      rational.numerator * currentScaleFactor -
-      rational.mantissa * rational.denominator;
-  final scaledRemainder = remainder * extraFactor;
+  var mantissa = scaledNumerator ~/ rational.denominator;
+  final remainder = scaledNumerator.remainder(rational.denominator);
 
-  final roundedDelta = _roundDiv(scaledRemainder, rational.denominator);
+  // Round to nearest integer (half away from zero).
+  if ((remainder.abs() << 1) >= rational.denominator)
+    mantissa += BigInt.from(scaledNumerator.sign);
 
-  rational.mantissa = rational.mantissa * extraFactor + roundedDelta;
-  rational.scale = precision;
+  rational.mantissa = mantissa;
+  rational.scale = scale;
+  rational.precision = precision;
 }
