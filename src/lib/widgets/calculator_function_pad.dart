@@ -36,6 +36,9 @@ class CalculatorFunctionPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color numberAccent =
+        Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.45);
+
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Card(
@@ -87,6 +90,9 @@ class CalculatorFunctionPad extends StatelessWidget {
                                         onPressed: () =>
                                             onFunctionPressed(button.insertion),
                                         style: OutlinedButton.styleFrom(
+                                          backgroundColor: button.isNumber
+                                              ? numberAccent
+                                              : null,
                                           alignment: Alignment.center,
                                           minimumSize: const Size.fromHeight(
                                             48,

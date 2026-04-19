@@ -60,32 +60,46 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   static const List<List<FunctionButtonData>> _functionRows = [
     [
-      FunctionButtonData(label: 'sin', insertion: r'\sin'),
-      FunctionButtonData(label: 'cos', insertion: r'\cos'),
-      FunctionButtonData(label: 'tan', insertion: r'\tan'),
-      FunctionButtonData(label: 'ln', insertion: r'\ln'),
-      FunctionButtonData(label: 'log', insertion: r'\log_'),
-    ],
-    [
-      FunctionButtonData(label: 'asin', insertion: r'\sin^{-1}'),
-      FunctionButtonData(label: 'acos', insertion: r'\cos^{-1}'),
-      FunctionButtonData(label: 'atan', insertion: r'\tan^{-1}'),
-      FunctionButtonData(label: '√', insertion: r'\sqrt{'),
-      FunctionButtonData(label: 'x²', insertion: '^2'),
-    ],
-    [
-      FunctionButtonData(label: 'xʸ', insertion: '^'),
+      FunctionButtonData(label: '|x|', insertion: 'abs()'),
       FunctionButtonData(label: 'π', insertion: r'\pi'),
       FunctionButtonData(label: 'e', insertion: 'e'),
-      FunctionButtonData(label: '|x|', insertion: 'abs()'),
-      FunctionButtonData(label: 'mod', insertion: r'\mod'),
+      FunctionButtonData(label: 'log', insertion: r'\log_'),
+      FunctionButtonData(label: 'ln', insertion: r'\ln'),
     ],
     [
+      FunctionButtonData(label: 'mod', insertion: r'\mod'),
+      FunctionButtonData(label: '!', insertion: '!'),
+      FunctionButtonData(label: '√', insertion: r'\sqrt{'),
+      FunctionButtonData(label: 'x²', insertion: '^2'),
+      FunctionButtonData(label: 'xʸ', insertion: '^'),
+    ],
+    [
+      FunctionButtonData(label: '7', insertion: '7', isNumber: true),
+      FunctionButtonData(label: '8', insertion: '8', isNumber: true),
+      FunctionButtonData(label: '9', insertion: '9', isNumber: true),
       FunctionButtonData(label: '(', insertion: '('),
       FunctionButtonData(label: ')', insertion: ')'),
-      FunctionButtonData(label: '!', insertion: '!'),
+    ],
+    [
+      FunctionButtonData(label: '4', insertion: '4', isNumber: true),
+      FunctionButtonData(label: '5', insertion: '5', isNumber: true),
+      FunctionButtonData(label: '6', insertion: '6', isNumber: true),
+      FunctionButtonData(label: '×', insertion: r'\cdot'),
+      FunctionButtonData(label: '÷', insertion: r'\div'),
+    ],
+    [
+      FunctionButtonData(label: '1', insertion: '1', isNumber: true),
+      FunctionButtonData(label: '2', insertion: '2', isNumber: true),
+      FunctionButtonData(label: '3', insertion: '3', isNumber: true),
+      FunctionButtonData(label: '+', insertion: '+'),
+      FunctionButtonData(label: '-', insertion: '-'),
+    ],
+    [
+      FunctionButtonData(label: '0', insertion: '0', isNumber: true),
+      FunctionButtonData(label: '.', insertion: '.', isNumber: true),
       FunctionButtonData(label: '%', insertion: '%'),
-      FunctionButtonData(label: ',', insertion: ','),
+      FunctionButtonData(label: '←', insertion: '__LEFT__'),
+      FunctionButtonData(label: '→', insertion: '__RIGHT__'),
     ],
   ];
 
@@ -137,7 +151,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   /// Inserts [text] into the expression field using the MathField controller.
   void _insertText(String text) {
-    if (text == r'\sqrt{') {
+    if (text == '__LEFT__') {
+      _expressionController.goBack();
+    } else if (text == '__RIGHT__') {
+      _expressionController.goNext();
+    } else if (text == r'\sqrt{') {
       _expressionController.addFunction(r'\sqrt', [TeXArg.braces]);
     } else if (text == '^') {
       _expressionController.addFunction('^', [TeXArg.braces]);
