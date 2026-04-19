@@ -1,33 +1,40 @@
 import 'package:math_core/error_budgeting.dart';
-import 'package:math_core/literals.dart';
-import 'package:math_core/rational_approximation.dart';
-import 'package:math_core/rational_math.dart';
-import 'package:math_core/real_math.dart';
+import 'package:math_core/literals/literals.dart';
+import 'package:math_core/rational_math/rational_approximation.dart';
+import 'package:math_core/rational_math/rational_math.dart';
+import 'package:math_core/real_math/real_math.dart';
 import 'package:syntax_tree/expression.dart';
 import 'package:syntax_tree/expression_types.dart';
 import 'package:syntax_tree/syntax_tree.dart';
 import 'package:syntax_tree/evaluation_result.dart';
 
-/// MathCore is a math library that evaluates the value of each node in a given syntax tree.
-/// It uses constructive real arithmetic to guarantee a upper bound on the error of the final result
+/// MathCore evaluates expressions in a syntax tree using constructive real arithmetic (CRA).
 ///
-/// This implementation is heavily inspired by the modified version of the calculator developed by
-/// Hans-J. Boehm at SGI ([https://www.hboehm.info/new_crcalc/CRCalc.html])
+/// CRA treats each computed value as an exact description that can later be approximated
+/// to any requested precision, rather than eagerly rounding at every step. This lets us
+/// propagate tight error bounds across complex trees without accumulating floating noise.
+///
+/// The implementation draws inspiration from Hans-J. Boehm’s CR calculator:
+/// https://www.hboehm.info/new_crcalc/CRCalc.html
 class MathCore {
   MathCore._();
 
-  /// Evaluates the value of the given syntax [tree] to the specified [precision] and also the intermediate results
-  /// of each node to the precision required for the calculation.
+  /// Evaluates the value of the given syntax [tree] to the specified [precision].
   ///
-  /// The result is guaranteed to be within 10^-[precision] of the true value (meaning the first [precision] digits
-  /// after the decimal point are most likely correct (see note))
+  /// Each node stores its own evaluated result. For non-leaf expressions this includes
+  /// approximating children at a *higher* internal precision so the parent can still
+  /// guarantee the requested decimal accuracy. This is the core CRA strategy: compute
+  /// as precisely as needed for the error budget, then round once at the end.
   ///
-  /// Nothing is returned, instead the results/errors are stored in the nodes themselves.
+  /// The final value is guaranteed to be within 10^-[precision] of the true value.
+  /// In most cases that means the first [precision] digits will be correct, but in some cases
+  /// some low-order digits may differ if you later request a higher precision; the
+  /// bound remains correct even when the representation looks counterintuitive.
   ///
-  /// Note: The error bound will be always correct, but in some cases the digits might change during more precise recomputation.
-  /// For example:
-  /// 1.0000 is within 10^-4 of 0.99999, but it is the closest decimal representation of the true value, so the result is
-  /// correct even if counterintuitive.
+  /// To keep decimal output stable, the real-number path applies a half‑ULP
+  /// (unit in the last place) bias at the requested precision. That nudges rounding
+  /// toward decimal truncation so outputs match expected formatting while staying
+  /// within the CRA error bound.
   static void evaluate(SyntaxTree tree, int precision) {
     // If the tree is empty, there's nothing to evaluate
     if (tree.root == null) return;
@@ -119,14 +126,16 @@ class MathCore {
     // Based on the result of the child expression evaluation, pick the appropriate logic for the result of this expression
     switch (child.value) {
       // For now, all unary operators only work on the constructive real numbers, so if the child expression is
-      // rational, we need to calculate the real approximation
+      // rational, we need to calculate the real approximation as well
       case RationalResult rationalResult:
         approximateRationalToPrecision(rationalResult, requiredChildPrecision);
         RealMath.EvaluateUnaryExpression(unary, precision);
+        return;
 
       // Handle the real result
       case RealResult():
         RealMath.EvaluateUnaryExpression(unary, precision);
+        return;
 
       // This codepath should never be reached as we already check for errors and indeterminate results above, but we return indeterminate just to be safe
       default:
@@ -157,8 +166,8 @@ class MathCore {
       return;
     }
 
-    // If both subtrees are rational, we can stay in the rational realm and avoid the overhead of approximating to constructive reals
-    if (left.value is RationalResult && right.value is RationalResult) {
+    // If possible, stay in the realm of rational numbers
+    if (RationalMath.CanEvaluateBinaryExpression(binary)) {
       RationalMath.EvaluateBinaryExpression(binary);
       return;
     }
@@ -179,7 +188,7 @@ class MathCore {
         left.value as RationalResult,
         requiredLeftPrecision,
       );
-    else if (right.value is RationalResult)
+    if (right.value is RationalResult)
       approximateRationalToPrecision(
         right.value as RationalResult,
         requiredRightPrecision,
@@ -189,19 +198,23 @@ class MathCore {
     RealMath.EvaluateBinaryExpression(binary, precision);
   }
 
-  /// Helper function to check, whether we can use the cached [result] of a subtree evaluation based on the required [precision]
-  static bool _canUseCached(EvaluationResult? result, int presicion) {
+  /// Checks whether a cached subtree result is sufficiently precise to reuse.
+  ///
+  /// - Errors/indeterminate and exact rational results are always reusable.
+  /// - For real values, we reuse only if the cached precision is at least
+  ///   the requested precision (to avoid losing digits when precision decreases).
+  static bool _canUseCached(EvaluationResult? result, int precision) {
     // If the result is null, it means that the subtree hasn't been evaluated yet, so we can't use the cached result
     if (result == null) return false;
 
     // If the result is an error or indeterminate, we can use the cached result regardless of the required precision
     if (result is ErrorResult || result is IndeterminateResult) return true;
 
-    // If the result is a rational number, we can use the cached result regardless of the required precision
-    if (result is RationalResult) return result.scale >= presicion;
+    // If the result is a rational number, we can always reuse the cached result
+    if (result is RationalResult) return true;
 
     // If the result is a real number, we can only use the cached result if its precision is greater than or equal to the required precision
-    if (result is RealResult) return result.scale >= presicion;
+    if (result is RealResult) return result.precision >= precision;
 
     // This codepath should never be reached but we return false just to be safe
     return false;

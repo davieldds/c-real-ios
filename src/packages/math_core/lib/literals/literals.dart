@@ -1,4 +1,5 @@
-import 'package:math_core/series_cache.dart';
+import 'package:math_core/bigint_helpers.dart';
+import 'package:math_core/literals/series_cache.dart';
 import 'package:syntax_tree/evaluation_result.dart';
 import 'package:syntax_tree/expression_types.dart';
 
@@ -60,24 +61,32 @@ class Literals {
     }
   }
 
-  /// Evaluates the value of pi to the specified [precision] and stores it in the [literal]'s value.
-  /// Uses Machin's formula with integer series at a binary fixed-point scale:
-  ///   pi/4 = 4*atan(1/5) - atan(1/239).
-  static void _pi(LiteralExpression literal, int precision) {
+  static ({int normalizedPrecision, int scale, BigInt halfUlpMantissa})
+  _literalScaleData(int precision) {
     // Normalize precision so negative values behave like 0.
     final normalizedPrecision = precision < 0 ? 0 : precision;
 
     // We represent real numbers as mantissa * 2^scale.
     // Using ~4 bits per decimal digit plus guard bits gives safe rounding.
     final scale = -(normalizedPrecision * 4 + 8);
-    final scalePow = BigInt.one << (-scale);
 
-    // Compute half of a decimal ULP at this scale.
-    // This small bias matches the truncation expectations of the tests.
-    final decimalUlp = BigInt.from(10).pow(normalizedPrecision);
-    final halfUlpMantissa =
-        (scalePow + (decimalUlp * BigInt.two) - BigInt.one) ~/
-        (decimalUlp * BigInt.two);
+    final halfUlpMantissa = halfUlpBiasMantissa(scale, normalizedPrecision);
+
+    return (
+      normalizedPrecision: normalizedPrecision,
+      scale: scale,
+      halfUlpMantissa: halfUlpMantissa,
+    );
+  }
+
+  /// Evaluates the value of pi to the specified [precision] and stores it in the [literal]'s value.
+  /// Uses Machin's formula with integer series at a binary fixed-point scale:
+  ///   pi/4 = 4*atan(1/5) - atan(1/239).
+  static void _pi(LiteralExpression literal, int precision) {
+    final scaleData = _literalScaleData(precision);
+    final normalizedPrecision = scaleData.normalizedPrecision;
+    final scale = scaleData.scale;
+    final halfUlpMantissa = scaleData.halfUlpMantissa;
 
     // Fetch (or initialize) the shared cache for pi.
     final cache = getPiCache(scale);
@@ -109,19 +118,10 @@ class Literals {
   /// Uses the factorial series:
   ///   e = Σ 1/n!
   static void _e(LiteralExpression literal, int precision) {
-    // Normalize precision so negative values behave like 0.
-    final normalizedPrecision = precision < 0 ? 0 : precision;
-
-    // We represent real numbers as mantissa * 2^scale.
-    final scale = -(normalizedPrecision * 4 + 8);
-    final scalePow = BigInt.one << (-scale);
-
-    // Compute half of a decimal ULP at this scale.
-    // This small bias matches the truncation expectations of the tests.
-    final decimalUlp = BigInt.from(10).pow(normalizedPrecision);
-    final halfUlpMantissa =
-        (scalePow + (decimalUlp * BigInt.two) - BigInt.one) ~/
-        (decimalUlp * BigInt.two);
+    final scaleData = _literalScaleData(precision);
+    final normalizedPrecision = scaleData.normalizedPrecision;
+    final scale = scaleData.scale;
+    final halfUlpMantissa = scaleData.halfUlpMantissa;
 
     // Fetch (or initialize) the shared cache for e and extend if needed.
     final cache = getECache(scale);

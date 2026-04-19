@@ -10,10 +10,12 @@ class RationalMath {
   /// Helper method that checks, whether a given binary [expression] can be evaluated in the realm of
   /// rational numbers.
   static bool CanEvaluateBinaryExpression(BinaryExpression expression) {
-    final left = expression.leftArg as EvaluationResult,
-        right = expression.rightArg as EvaluationResult,
+    final left = expression.leftArg?.value,
+        right = expression.rightArg?.value,
         isLeftRational = left is RationalResult,
         isRightRational = right is RationalResult;
+
+    if (left == null || right == null) return false;
 
     switch (expression) {
       // For addition, subtraction, multiplication and division, both arguments must be rational to stay in the rational realm.

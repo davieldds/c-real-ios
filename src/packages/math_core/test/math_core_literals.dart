@@ -1,5 +1,5 @@
 import "package:math_core/math_core.dart";
-import "package:math_core/series_cache.dart";
+import "package:math_core/literals/series_cache.dart";
 import "package:test/test.dart";
 
 import "helpers.dart";

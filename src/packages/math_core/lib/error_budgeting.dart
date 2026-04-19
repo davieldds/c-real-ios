@@ -31,8 +31,9 @@ class ErrorBudgeting {
     // Start with a quick evaluation at low precision to catch large magnitudes without overhead
     MathCore.evaluateExpression(expression, precision);
 
-    // If we already have a rational result or an error, we can skip the iterative search
-    if (expression is LiteralExpression ||
+    // If we already have a non-zero representation, the magnitude is already measurable
+    if ((expression.value is RealResult &&
+            (expression.value as RealResult).mantissa != BigInt.zero) ||
         expression.value is RationalResult ||
         expression.value is ErrorResult ||
         expression.value is IndeterminateResult)
@@ -52,7 +53,7 @@ class ErrorBudgeting {
       if (precision > _ASUME_ZERO_PRECISION) return;
 
       // Increase precision exponentially to quickly find the MSB
-      precision *= 2;
+      precision <<= 1;
     }
   }
 
@@ -72,8 +73,7 @@ class ErrorBudgeting {
         return normalizedPrecision + 2;
 
       default:
-        // Future non-linear unary functions (like exp(x)) scale error by their derivative.
-        // For those, precision would dynamically depend on _getMagnitude(childResult).
+        // This code path should never be reached but just to be safe we return a default precision budget of 2 guard bits
         return normalizedPrecision + 2;
     }
   }

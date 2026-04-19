@@ -189,6 +189,33 @@ void main() {
         expectValueOneOf(root, ["4", "4.0000"]);
       });
 
+      test("raises to real exponent derived from sqrt", () {
+        final root = pwr(lit("9.0"), sqrt(lit("0.25")));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValueOneOf(root, ["3", "3.0000"]);
+      });
+
+      test("raises to irrational real exponent", () {
+        final root = pwr(lit("2.0"), sqrt(lit("2.0")));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValue(root, "2.6651");
+      });
+
+      test("negative base to irrational exponent reports error", () {
+        final root = pwr(sub(lit("0.0"), lit("2.0")), sqrt(lit("2.0")));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectErrorIsNotEmpty(root);
+      });
+
       test("raises zero to a positive power", () {
         final root = pwr(lit("0.0"), lit("3.0"));
         final tree = treeWith(root);

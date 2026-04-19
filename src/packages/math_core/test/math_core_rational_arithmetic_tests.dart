@@ -43,11 +43,11 @@ void main() {
       MathCore.evaluate(tree, 4);
 
       expectValue(root, "5/3");
-      expectDecimalValue(root, "1.6666");
+      expectDecimalValue(root, "1.6667");
     });
 
     test("does not crash on division by zero", () {
-      final root = div(lit("0.5"), lit("0.3"));
+      final root = div(lit("0.5"), lit("0.0"));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);
@@ -56,7 +56,7 @@ void main() {
     });
 
     test("reports specific error on division by zero", () {
-      final root = div(lit("0.5"), lit("0.3"));
+      final root = div(lit("0.5"), lit("0.0"));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);
@@ -75,7 +75,7 @@ void main() {
     });
 
     test("evaluates rational to the power of positive integer", () {
-      final root = pwr(lit("0.5"), lit("3"));
+      final root = pwr(lit("0.5"), lit("3.0"));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);
@@ -85,7 +85,7 @@ void main() {
     });
 
     test("evaluates rational to the power of negative integer", () {
-      final root = pwr(lit("0.5"), sub(lit("0"), lit("3")));
+      final root = pwr(lit("0.5"), sub(lit("0.0"), lit("3.0")));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);
@@ -95,7 +95,7 @@ void main() {
     });
 
     test("zero to the power of negative integer reports error", () {
-      final root = pwr(lit("0"), sub(lit("0"), lit("3")));
+      final root = pwr(lit("0.0"), sub(lit("0.0"), lit("3.0")));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);
@@ -104,7 +104,7 @@ void main() {
     });
 
     test("zero to the power of negative integer reports specific error", () {
-      final root = pwr(lit("0"), sub(lit("0"), lit("3")));
+      final root = pwr(lit("0.0"), sub(lit("0.0"), lit("3.0")));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);
@@ -113,7 +113,7 @@ void main() {
     });
 
     test("evaluates negative rational to even power", () {
-      final root = pwr(sub(lit("0"), lit("0.5")), lit("2"));
+      final root = pwr(sub(lit("0.0"), lit("0.5")), lit("2.0"));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);
@@ -123,7 +123,7 @@ void main() {
     });
 
     test("evaluates negative rational to odd power", () {
-      final root = pwr(sub(lit("0"), lit("0.5")), lit("3"));
+      final root = pwr(sub(lit("0.0"), lit("0.5")), lit("3.0"));
       final tree = treeWith(root);
 
       MathCore.evaluate(tree, 4);

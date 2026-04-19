@@ -52,3 +52,16 @@ BigInt shiftRightRounded(BigInt value, int shift) {
   }
   return quotient;
 }
+
+/// Computes half of a decimal ULP expressed in mantissa units for the given binary [scale]
+/// and decimal [precision]. Returns zero when no bias is applicable.
+BigInt halfUlpBiasMantissa(int scale, int precision) {
+  if (precision <= 0) return BigInt.zero;
+  if (scale >= 0) return BigInt.zero;
+
+  final scalePow = BigInt.one << (-scale);
+  final decimalUlp = BigInt.from(10).pow(precision);
+
+  return (scalePow + (decimalUlp * BigInt.two) - BigInt.one) ~/
+      (decimalUlp * BigInt.two);
+}
