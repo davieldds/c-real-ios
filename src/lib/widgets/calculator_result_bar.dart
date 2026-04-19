@@ -67,6 +67,7 @@ class CalculatorResultBar extends StatelessWidget {
           child: FilledButton(
             onPressed: onCalculatePressed,
             style: FilledButton.styleFrom(
+              alignment: Alignment.center,
               textStyle: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
@@ -75,7 +76,7 @@ class CalculatorResultBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: const Text('=').fontSize(32),
+            child: const Text('=', textAlign: TextAlign.center).fontSize(32),
           ),
         ),
       ).expanded1,

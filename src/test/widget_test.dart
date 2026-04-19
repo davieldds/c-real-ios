@@ -27,7 +27,7 @@ void main() {
 
     await pumpMainApp(tester, viewport: const Size(1200, 800));
 
-    expect(find.text('IVS Projekt 2 Kalkulačka'), findsOneWidget);
+    expect(find.text('C-Real'), findsOneWidget);
     expect(find.text('Expression'), findsOneWidget);
     expect(find.text('Result'), findsOneWidget);
     expect(find.text('Scientific functions'), findsOneWidget);

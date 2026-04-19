@@ -87,6 +87,7 @@ class CalculatorFunctionPad extends StatelessWidget {
                                         onPressed: () =>
                                             onFunctionPressed(button.insertion),
                                         style: OutlinedButton.styleFrom(
+                                          alignment: Alignment.center,
                                           minimumSize: const Size.fromHeight(
                                             48,
                                           ),
@@ -100,7 +101,10 @@ class CalculatorFunctionPad extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                        child: Text(button.label),
+                                        child: Text(
+                                          button.label,
+                                          textAlign: TextAlign.center,
+                                        ),
                                       ),
                                     ),
                                   ),
