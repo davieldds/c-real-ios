@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 // ignore: implementation_imports
 import 'package:math_keyboard/src/foundation/node.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/function_button_data.dart';
 import '../models/history_entry.dart';
@@ -30,12 +34,15 @@ class CalculatorPage extends StatefulWidget {
 /// used by the calculator UI.
 class _CalculatorPageState extends State<CalculatorPage> {
   static const double _splitLayoutWidth = 980;
+  static const String _historyStorageKey = 'calculator.history';
+  static const int _maxHistoryItems = 50;
   final MathFieldEditingController _expressionController =
       MathFieldEditingController();
   final FocusNode _expressionFocusNode = FocusNode();
   _CompactPanelView _compactPanelView = _CompactPanelView.keypad;
+  String _resultText = '0';
 
-  static const List<HistoryEntry> _historyItems = [
+  final List<HistoryEntry> _historyItems = [
     HistoryEntry(expression: 'sin(pi / 2)', result: '1'),
     HistoryEntry(expression: 'sqrt(2)', result: '1.41421356'),
     HistoryEntry(expression: '5!', result: '120'),
@@ -78,6 +85,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
   @override
   void initState() {
     super.initState();
+    _loadHistory();
     _expressionController.addListener(() {
       try {
         final tex = _expressionController.currentEditingValue();
@@ -135,6 +143,118 @@ class _CalculatorPageState extends State<CalculatorPage> {
     _expressionFocusNode.requestFocus();
   }
 
+  /// Evaluates the expression and stores it as a history item.
+  void _calculateExpression() {
+    final String tex = _expressionController.currentEditingValue(
+      placeholderWhenEmpty: false,
+    );
+    if (tex.trim().isEmpty) {
+      return;
+    }
+
+    try {
+      final parsedExpression = TeXParser(tex).parse();
+      final double value = parsedExpression.evaluate(
+        EvaluationType.REAL,
+        ContextModel(),
+      );
+      final String formattedResult = _formatResult(value);
+
+      setState(() {
+        _resultText = formattedResult;
+        _historyItems.insert(
+          0,
+          HistoryEntry(expression: tex, result: formattedResult),
+        );
+        if (_historyItems.length > _maxHistoryItems) {
+          _historyItems.removeRange(_maxHistoryItems, _historyItems.length);
+        }
+      });
+      _saveHistory();
+    } catch (_) {
+      setState(() {
+        _resultText = 'Error';
+        _historyItems.insert(0, HistoryEntry(expression: tex, result: 'Error'));
+        if (_historyItems.length > _maxHistoryItems) {
+          _historyItems.removeRange(_maxHistoryItems, _historyItems.length);
+        }
+      });
+      _saveHistory();
+    }
+  }
+
+  /// Clears all history entries.
+  void _clearHistory() {
+    setState(_historyItems.clear);
+    _saveHistory();
+  }
+
+  /// Restores a history entry expression into the editor.
+  void _reuseHistoryEntry(HistoryEntry entry) {
+    try {
+      final parsedExpression = TeXParser(entry.expression).parse();
+      _expressionController.updateValue(parsedExpression);
+    } catch (_) {
+      _clearExpression();
+      _expressionController.addLeaf(entry.expression);
+    }
+    _expressionFocusNode.requestFocus();
+  }
+
+  String _formatResult(double value) {
+    if (value.isNaN || value.isInfinite) {
+      return value.toString();
+    }
+
+    final String fixed = value.toStringAsFixed(10);
+    return fixed.contains('.')
+        ? fixed
+              .replaceFirst(RegExp(r'0+$'), '')
+              .replaceFirst(RegExp(r'\.$'), '')
+        : fixed;
+  }
+
+  Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rawJson = prefs.getString(_historyStorageKey);
+    if (rawJson == null || rawJson.isEmpty) {
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawJson);
+      if (decoded is! List) {
+        return;
+      }
+      final loadedEntries = decoded
+          .whereType<Map<String, dynamic>>()
+          .map(HistoryEntry.fromMap)
+          .where((entry) => entry.expression.trim().isNotEmpty)
+          .take(_maxHistoryItems)
+          .toList();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _historyItems
+          ..clear()
+          ..addAll(loadedEntries);
+      });
+    } catch (_) {
+      // Ignore malformed persisted history and keep current in-memory defaults.
+    }
+  }
+
+  Future<void> _saveHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = jsonEncode(
+      _historyItems.map((item) => item.toMap()).toList(),
+    );
+    await prefs.setString(_historyStorageKey, encoded);
+  }
+
   /// Opens the standard Flutter about dialog for the application.
   void _showAboutDialog() {
     showAboutDialog(
@@ -180,8 +300,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
                   SizedBox(
                     height: resultHeight,
                     child: CalculatorResultBar(
-                      resultText: '0',
-                      onCalculatePressed: () {},
+                      resultText: _resultText,
+                      onCalculatePressed: _calculateExpression,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -205,8 +325,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
         Expanded(
           child: CalculatorHistoryPanel(
             historyItems: _historyItems,
-            onClearHistory: () {},
-            onReuseEntry: (_) {},
+            onClearHistory: _clearHistory,
+            onReuseEntry: _reuseHistoryEntry,
           ),
         ),
         const SizedBox(width: 10),
@@ -255,8 +375,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
                     key: const ValueKey<String>('history'),
                     child: CalculatorHistoryPanel(
                       historyItems: _historyItems,
-                      onClearHistory: () {},
-                      onReuseEntry: (_) {},
+                      onClearHistory: _clearHistory,
+                      onReuseEntry: _reuseHistoryEntry,
                     ),
                   ),
           ),
