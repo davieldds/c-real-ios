@@ -7,7 +7,7 @@ import 'package:math_keyboard/math_keyboard.dart';
 /// This widget provides the main text input area for calculator expressions.
 /// It is intentionally generic so that expression parsing and validation logic
 /// can be supplied by other parts of the application.
-class CalculatorExpressionField extends StatelessWidget {
+class CalculatorExpressionField extends StatefulWidget {
   /// Creates the expression field widget.
   const CalculatorExpressionField({
     super.key,
@@ -34,6 +34,20 @@ class CalculatorExpressionField extends StatelessWidget {
   final String? helperText;
 
   @override
+  State<CalculatorExpressionField> createState() =>
+      _CalculatorExpressionFieldState();
+}
+
+class _CalculatorExpressionFieldState extends State<CalculatorExpressionField> {
+  late final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -47,38 +61,56 @@ class CalculatorExpressionField extends StatelessWidget {
             hintText: 'Enter your calculation here',
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(Icons.functions),
-            errorText: errorText,
-            helperText: helperText,
+            errorText: widget.errorText,
+            helperText: widget.helperText,
           ),
           child: Focus(
             onKeyEvent: (node, event) {
               if (event is KeyDownEvent &&
                   (event.logicalKey == LogicalKeyboardKey.enter ||
                       event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
-                onSubmitRequested();
+                widget.onSubmitRequested();
                 return KeyEventResult.handled;
               }
               return KeyEventResult.ignored;
             },
-            child: SizedBox.expand(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 48),
-                  child: MathField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    opensKeyboard: false,
-                    onSubmitted: (_) => onSubmitRequested(),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isCollapsed: true,
-                      // Work around math_keyboard's high baseline by biasing
-                      // the field's own internal content box downward.
-                      contentPadding: EdgeInsets.only(top: 18.0, bottom: 0.0),
+            child: ClipRect(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Scrollbar(
+                    controller: _scrollController,
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 48),
+                            child: MathField(
+                              controller: widget.controller,
+                              focusNode: widget.focusNode,
+                              opensKeyboard: false,
+                              onSubmitted: (_) => widget.onSubmitRequested(),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                isCollapsed: true,
+                                // Work around math_keyboard's high baseline by biasing
+                                // the field's own internal content box downward.
+                                contentPadding: EdgeInsets.only(
+                                  top: 18.0,
+                                  bottom: 6.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),
