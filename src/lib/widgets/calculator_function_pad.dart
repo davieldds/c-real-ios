@@ -43,25 +43,24 @@ class CalculatorFunctionPad extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: [
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Expanded(
-                  child: Text(
-                    'Scientific functions',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                Text(
+                  'Scientific functions',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 IconButton.filledTonal(
                   onPressed: onDeletePressed,
                   icon: const Icon(Icons.backspace_outlined),
                   tooltip: 'Delete',
                 ),
-                const SizedBox(width: 8),
                 FilledButton.tonal(
                   onPressed: onClearPressed,
                   child: const Text('Clear'),
                 ),
-                const SizedBox(width: 8),
                 FilledButton.tonal(
                   onPressed: onFractionPressed,
                   child: const Text('a/b'),
@@ -89,10 +88,10 @@ class CalculatorFunctionPad extends StatelessWidget {
                                             onFunctionPressed(button.insertion),
                                         style: OutlinedButton.styleFrom(
                                           minimumSize: const Size.fromHeight(
-                                            56,
+                                            48,
                                           ),
                                           textStyle: const TextStyle(
-                                            fontSize: 18,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.w600,
                                           ),
                                           shape: RoundedRectangleBorder(

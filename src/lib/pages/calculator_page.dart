@@ -1,4 +1,3 @@
-import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 // ignore: implementation_imports
@@ -30,9 +29,11 @@ class CalculatorPage extends StatefulWidget {
 /// Manages text insertion into the expression field and interactive controls
 /// used by the calculator UI.
 class _CalculatorPageState extends State<CalculatorPage> {
+  static const double _splitLayoutWidth = 980;
   final MathFieldEditingController _expressionController =
       MathFieldEditingController();
   final FocusNode _expressionFocusNode = FocusNode();
+  _CompactPanelView _compactPanelView = _CompactPanelView.keypad;
 
   static const List<HistoryEntry> _historyItems = [
     HistoryEntry(expression: 'sin(pi / 2)', result: '1'),
@@ -155,38 +156,129 @@ class _CalculatorPageState extends State<CalculatorPage> {
         title: widget.title,
         onAboutSelected: _showAboutDialog,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: [
-          CalculatorExpressionField(
-            controller: _expressionController,
-            focusNode: _expressionFocusNode,
-          ).container(height: 150),
-          CalculatorResultBar(
-            resultText: '0',
-            onCalculatePressed: () {},
-          ).container(height: 96),
-          [
-            CalculatorHistoryPanel(
-              historyItems: _historyItems,
-              onClearHistory: () {},
-              onReuseEntry: (_) {},
-            ).expanded1,
-            CalculatorFunctionPad(
-              functionRows: _functionRows,
-              onDeletePressed: _backspace,
-              onClearPressed: _clearExpression,
-              onFractionPressed: () {
-                _expressionController.addFunction(r'\frac', [
-                  TeXArg.braces,
-                  TeXArg.braces,
-                ]);
-              },
-              onFunctionPressed: _insertText,
-            ).expanded1,
-          ].row().container(height: 350),
-        ].column(spacing: 10.0),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool useSplitLayout =
+                constraints.maxWidth >= _splitLayoutWidth;
+            final double expressionHeight = (constraints.maxHeight * 0.22)
+                .clamp(120.0, 180.0);
+            const double resultHeight = 96.0;
+
+            return Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: expressionHeight,
+                    child: CalculatorExpressionField(
+                      controller: _expressionController,
+                      focusNode: _expressionFocusNode,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: resultHeight,
+                    child: CalculatorResultBar(
+                      resultText: '0',
+                      onCalculatePressed: () {},
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: useSplitLayout
+                        ? _buildSplitContent()
+                        : _buildCompactContent(),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
+
+  Widget _buildSplitContent() {
+    return Row(
+      children: [
+        Expanded(
+          child: CalculatorHistoryPanel(
+            historyItems: _historyItems,
+            onClearHistory: () {},
+            onReuseEntry: (_) {},
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(child: _buildFunctionPad()),
+      ],
+    );
+  }
+
+  Widget _buildCompactContent() {
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SegmentedButton<_CompactPanelView>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment<_CompactPanelView>(
+                value: _CompactPanelView.keypad,
+                label: Text('Keypad'),
+                icon: Icon(Icons.dialpad_outlined),
+              ),
+              ButtonSegment<_CompactPanelView>(
+                value: _CompactPanelView.history,
+                label: Text('History'),
+                icon: Icon(Icons.history),
+              ),
+            ],
+            selected: {_compactPanelView},
+            onSelectionChanged: (selection) {
+              setState(() {
+                _compactPanelView = selection.first;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: _compactPanelView == _CompactPanelView.keypad
+                ? KeyedSubtree(
+                    key: const ValueKey<String>('keypad'),
+                    child: _buildFunctionPad(),
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey<String>('history'),
+                    child: CalculatorHistoryPanel(
+                      historyItems: _historyItems,
+                      onClearHistory: () {},
+                      onReuseEntry: (_) {},
+                    ),
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFunctionPad() {
+    return CalculatorFunctionPad(
+      functionRows: _functionRows,
+      onDeletePressed: _backspace,
+      onClearPressed: _clearExpression,
+      onFractionPressed: () {
+        _expressionController.addFunction(r'\frac', [
+          TeXArg.braces,
+          TeXArg.braces,
+        ]);
+      },
+      onFunctionPressed: _insertText,
+    );
+  }
 }
+
+enum _CompactPanelView { keypad, history }
