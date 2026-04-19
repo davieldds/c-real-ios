@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -40,12 +41,14 @@ class _CalculatorPageState extends State<CalculatorPage> {
   static const String _expressionStorageKey = 'calculator.expression';
   static const String _compactViewStorageKey = 'calculator.compact_view';
   static const int _maxHistoryItems = 50;
+  static const Duration _previewDebounce = Duration(milliseconds: 200);
   final MathFieldEditingController _expressionController =
       MathFieldEditingController();
   final FocusNode _expressionFocusNode = FocusNode();
   _CompactPanelView _compactPanelView = _CompactPanelView.keypad;
   String _resultText = '0';
   String? _expressionErrorText;
+  Timer? _previewDebounceTimer;
 
   final List<HistoryEntry> _historyItems = [
     HistoryEntry(expression: 'sin(pi / 2)', result: '1'),
@@ -96,30 +99,37 @@ class _CalculatorPageState extends State<CalculatorPage> {
         placeholderWhenEmpty: false,
       );
       _saveExpression(tex);
-      try {
-        final parsedExpression = TeXParser(tex).parse();
-        final double value = parsedExpression.evaluate(
-          EvaluationType.REAL,
-          ContextModel(),
-        );
-        final String previewText = tex.trim().isEmpty
-            ? ''
-            : _formatResult(value);
-        if (_expressionErrorText != null || _resultText != previewText) {
-          setState(() {
-            _expressionErrorText = null;
-            _resultText = previewText;
-          });
-          _saveResult();
+      _previewDebounceTimer?.cancel();
+      _previewDebounceTimer = Timer(_previewDebounce, () {
+        if (!mounted) {
+          return;
         }
-      } catch (_) {
-        // Keep the last valid result while typing invalid intermediate syntax.
-      }
+        try {
+          final parsedExpression = TeXParser(tex).parse();
+          final double value = parsedExpression.evaluate(
+            EvaluationType.REAL,
+            ContextModel(),
+          );
+          final String previewText = tex.trim().isEmpty
+              ? ''
+              : _formatResult(value);
+          if (_expressionErrorText != null || _resultText != previewText) {
+            setState(() {
+              _expressionErrorText = null;
+              _resultText = previewText;
+            });
+            _saveResult();
+          }
+        } catch (_) {
+          // Keep the last valid result while typing invalid intermediate syntax.
+        }
+      });
     });
   }
 
   @override
   void dispose() {
+    _previewDebounceTimer?.cancel();
     _expressionController.dispose();
     _expressionFocusNode.dispose();
     super.dispose();
