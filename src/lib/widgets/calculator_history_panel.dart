@@ -10,6 +10,7 @@ class CalculatorHistoryPanel extends StatelessWidget {
     required this.historyItems,
     required this.onClearHistory,
     required this.onReuseEntry,
+    required this.onDeleteEntry,
   });
 
   /// Entries displayed in the history list.
@@ -20,6 +21,9 @@ class CalculatorHistoryPanel extends StatelessWidget {
 
   /// Callback invoked when the user wants to reuse an entry.
   final ValueChanged<HistoryEntry> onReuseEntry;
+
+  /// Callback invoked when the user wants to delete one entry.
+  final ValueChanged<HistoryEntry> onDeleteEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -49,42 +53,68 @@ class CalculatorHistoryPanel extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Expanded(
-                child: ListView.separated(
-                  itemCount: historyItems.length,
-                  separatorBuilder: (context, index) =>
-                      const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final HistoryEntry item = historyItems[index];
-
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0,
-                      ),
-                      leading: const Icon(Icons.history),
-                      title: Text(
-                        item.expression,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        '= ${item.result}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                child: historyItems.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No history yet.\nCalculate an expression to see it here.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
+                      )
+                    : ListView.separated(
+                        itemCount: historyItems.length,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final HistoryEntry item = historyItems[index];
+
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 4.0,
+                            ),
+                            leading: const Icon(Icons.history),
+                            title: Text(
+                              item.expression,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(
+                              '= ${item.result}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                            trailing: Wrap(
+                              spacing: 4,
+                              children: [
+                                IconButton(
+                                  onPressed: () => onReuseEntry(item),
+                                  icon: const Icon(Icons.north_west),
+                                  tooltip: 'Reuse expression',
+                                ),
+                                IconButton(
+                                  onPressed: () => onDeleteEntry(item),
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: 'Delete entry',
+                                ),
+                              ],
+                            ),
+                            onTap: () => onReuseEntry(item),
+                          );
+                        },
                       ),
-                      trailing: IconButton(
-                        onPressed: () => onReuseEntry(item),
-                        icon: const Icon(Icons.north_west),
-                        tooltip: 'Reuse expression',
-                      ),
-                      onTap: () => onReuseEntry(item),
-                    );
-                  },
-                ),
               ),
             ],
           ),

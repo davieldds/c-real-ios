@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
 /// Expression editor used for manual formula entry.
@@ -6,12 +7,15 @@ import 'package:math_keyboard/math_keyboard.dart';
 /// This widget provides the main text input area for calculator expressions.
 /// It is intentionally generic so that expression parsing and validation logic
 /// can be supplied by other parts of the application.
-class CalculatorExpressionField extends StatelessWidget {
+class CalculatorExpressionField extends StatefulWidget {
   /// Creates the expression field widget.
   const CalculatorExpressionField({
     super.key,
     required this.controller,
     required this.focusNode,
+    required this.onSubmitRequested,
+    this.errorText,
+    this.helperText,
   });
 
   /// Controller used to read and modify the expression text.
@@ -20,6 +24,29 @@ class CalculatorExpressionField extends StatelessWidget {
   /// Focus node used to restore keyboard focus after function insertion.
   final FocusNode focusNode;
 
+  /// Callback invoked when Enter/NumpadEnter is pressed.
+  final VoidCallback onSubmitRequested;
+
+  /// Optional inline error shown under the expression editor.
+  final String? errorText;
+
+  /// Optional helper text shown below the expression editor.
+  final String? helperText;
+
+  @override
+  State<CalculatorExpressionField> createState() =>
+      _CalculatorExpressionFieldState();
+}
+
+class _CalculatorExpressionFieldState extends State<CalculatorExpressionField> {
+  late final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,23 +54,63 @@ class CalculatorExpressionField extends StatelessWidget {
       // We use MathField here for native LaTeX rendering.
       // opensKeyboard is set to false because we want to embed the math keyboard
       // inside our custom calculator_function_pad.dart instead of using the overlay.
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Expression',
-          hintText: 'Enter your calculation here',
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.functions),
-        ),
-        child: ClipRect(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: MathField(
-              controller: controller,
-              focusNode: focusNode,
-              opensKeyboard: false,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
+      child: SizedBox.expand(
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Expression',
+            hintText: 'Enter your calculation here',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.functions),
+            errorText: widget.errorText,
+            helperText: widget.helperText,
+          ),
+          child: Focus(
+            onKeyEvent: (node, event) {
+              if (event is KeyDownEvent &&
+                  (event.logicalKey == LogicalKeyboardKey.enter ||
+                      event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+                widget.onSubmitRequested();
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+            child: ClipRect(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Scrollbar(
+                    controller: _scrollController,
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 48),
+                            child: MathField(
+                              controller: widget.controller,
+                              focusNode: widget.focusNode,
+                              opensKeyboard: false,
+                              onSubmitted: (_) => widget.onSubmitRequested(),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                isCollapsed: true,
+                                // Work around math_keyboard's high baseline by biasing
+                                // the field's own internal content box downward.
+                                contentPadding: EdgeInsets.only(
+                                  top: 18.0,
+                                  bottom: 6.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

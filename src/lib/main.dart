@@ -14,12 +14,24 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String appTitle = 'IVS Projekt 2 Kalkulačka';
+    const String appTitle = 'C-Real';
 
     return MaterialApp(
       title: appTitle,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(
+        useMaterial3: true,
+        filledButtonTheme: const FilledButtonThemeData(
+          style: ButtonStyle(
+            alignment: Alignment.center,
+          ),
+        ),
+        outlinedButtonTheme: const OutlinedButtonThemeData(
+          style: ButtonStyle(
+            alignment: Alignment.center,
+          ),
+        ),
+      ),
       home: const CalculatorPage(title: appTitle),
     );
   }
