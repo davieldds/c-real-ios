@@ -10,6 +10,7 @@ class CalculatorHistoryPanel extends StatelessWidget {
     required this.historyItems,
     required this.onClearHistory,
     required this.onReuseEntry,
+    required this.onDeleteEntry,
   });
 
   /// Entries displayed in the history list.
@@ -20,6 +21,9 @@ class CalculatorHistoryPanel extends StatelessWidget {
 
   /// Callback invoked when the user wants to reuse an entry.
   final ValueChanged<HistoryEntry> onReuseEntry;
+
+  /// Callback invoked when the user wants to delete one entry.
+  final ValueChanged<HistoryEntry> onDeleteEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -92,10 +96,20 @@ class CalculatorHistoryPanel extends StatelessWidget {
                                     ).colorScheme.onSurfaceVariant,
                                   ),
                             ),
-                            trailing: IconButton(
-                              onPressed: () => onReuseEntry(item),
-                              icon: const Icon(Icons.north_west),
-                              tooltip: 'Reuse expression',
+                            trailing: Wrap(
+                              spacing: 4,
+                              children: [
+                                IconButton(
+                                  onPressed: () => onReuseEntry(item),
+                                  icon: const Icon(Icons.north_west),
+                                  tooltip: 'Reuse expression',
+                                ),
+                                IconButton(
+                                  onPressed: () => onDeleteEntry(item),
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: 'Delete entry',
+                                ),
+                              ],
                             ),
                             onTap: () => onReuseEntry(item),
                           );

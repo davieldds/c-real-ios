@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
 /// Expression editor used for manual formula entry.
@@ -12,6 +13,9 @@ class CalculatorExpressionField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.focusNode,
+    required this.onSubmitRequested,
+    this.errorText,
+    this.helperText,
   });
 
   /// Controller used to read and modify the expression text.
@@ -19,6 +23,15 @@ class CalculatorExpressionField extends StatelessWidget {
 
   /// Focus node used to restore keyboard focus after function insertion.
   final FocusNode focusNode;
+
+  /// Callback invoked when Enter/NumpadEnter is pressed.
+  final VoidCallback onSubmitRequested;
+
+  /// Optional inline error shown under the expression editor.
+  final String? errorText;
+
+  /// Optional helper text shown below the expression editor.
+  final String? helperText;
 
   @override
   Widget build(BuildContext context) {
@@ -28,22 +41,36 @@ class CalculatorExpressionField extends StatelessWidget {
       // opensKeyboard is set to false because we want to embed the math keyboard
       // inside our custom calculator_function_pad.dart instead of using the overlay.
       child: InputDecorator(
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Expression',
           hintText: 'Enter your calculation here',
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.functions),
+          border: const OutlineInputBorder(),
+          prefixIcon: const Icon(Icons.functions),
+          errorText: errorText,
+          helperText: helperText,
         ),
         child: ClipRect(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: MathField(
-              controller: controller,
-              focusNode: focusNode,
-              opensKeyboard: false,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
+          child: Focus(
+            onKeyEvent: (node, event) {
+              if (event is KeyDownEvent &&
+                  (event.logicalKey == LogicalKeyboardKey.enter ||
+                      event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+                onSubmitRequested();
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: MathField(
+                controller: controller,
+                focusNode: focusNode,
+                opensKeyboard: false,
+                onSubmitted: (_) => onSubmitRequested(),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
             ),
           ),

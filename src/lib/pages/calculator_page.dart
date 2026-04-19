@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 // ignore: implementation_imports
@@ -35,12 +36,16 @@ class CalculatorPage extends StatefulWidget {
 class _CalculatorPageState extends State<CalculatorPage> {
   static const double _splitLayoutWidth = 980;
   static const String _historyStorageKey = 'calculator.history';
+  static const String _resultStorageKey = 'calculator.result';
+  static const String _expressionStorageKey = 'calculator.expression';
+  static const String _compactViewStorageKey = 'calculator.compact_view';
   static const int _maxHistoryItems = 50;
   final MathFieldEditingController _expressionController =
       MathFieldEditingController();
   final FocusNode _expressionFocusNode = FocusNode();
   _CompactPanelView _compactPanelView = _CompactPanelView.keypad;
   String _resultText = '0';
+  String? _expressionErrorText;
 
   final List<HistoryEntry> _historyItems = [
     HistoryEntry(expression: 'sin(pi / 2)', result: '1'),
@@ -85,14 +90,30 @@ class _CalculatorPageState extends State<CalculatorPage> {
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    _loadPersistedState();
     _expressionController.addListener(() {
+      final String tex = _expressionController.currentEditingValue(
+        placeholderWhenEmpty: false,
+      );
+      _saveExpression(tex);
       try {
-        final tex = _expressionController.currentEditingValue();
-        TeXParser(tex).parse();
-        // You can update the live result here if desired using the parsed expression
-      } catch (e) {
-        // Ignore parse errors while typing
+        final parsedExpression = TeXParser(tex).parse();
+        final double value = parsedExpression.evaluate(
+          EvaluationType.REAL,
+          ContextModel(),
+        );
+        final String previewText = tex.trim().isEmpty
+            ? ''
+            : _formatResult(value);
+        if (_expressionErrorText != null || _resultText != previewText) {
+          setState(() {
+            _expressionErrorText = null;
+            _resultText = previewText;
+          });
+          _saveResult();
+        }
+      } catch (_) {
+        // Keep the last valid result while typing invalid intermediate syntax.
       }
     });
   }
@@ -149,6 +170,9 @@ class _CalculatorPageState extends State<CalculatorPage> {
       placeholderWhenEmpty: false,
     );
     if (tex.trim().isEmpty) {
+      setState(() {
+        _expressionErrorText = 'Enter an expression.';
+      });
       return;
     }
 
@@ -162,30 +186,29 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
       setState(() {
         _resultText = formattedResult;
-        _historyItems.insert(
-          0,
-          HistoryEntry(expression: tex, result: formattedResult),
-        );
-        if (_historyItems.length > _maxHistoryItems) {
-          _historyItems.removeRange(_maxHistoryItems, _historyItems.length);
-        }
+        _expressionErrorText = null;
+        _appendHistoryEntry(tex, formattedResult);
       });
-      _saveHistory();
+      _saveState();
     } catch (_) {
       setState(() {
         _resultText = 'Error';
-        _historyItems.insert(0, HistoryEntry(expression: tex, result: 'Error'));
-        if (_historyItems.length > _maxHistoryItems) {
-          _historyItems.removeRange(_maxHistoryItems, _historyItems.length);
-        }
+        _expressionErrorText = 'Invalid expression. Please check syntax.';
       });
-      _saveHistory();
+      _saveResult();
     }
   }
 
   /// Clears all history entries.
   void _clearHistory() {
     setState(_historyItems.clear);
+    _saveHistory();
+  }
+
+  void _deleteHistoryEntry(HistoryEntry entry) {
+    setState(() {
+      _historyItems.remove(entry);
+    });
     _saveHistory();
   }
 
@@ -214,37 +237,78 @@ class _CalculatorPageState extends State<CalculatorPage> {
         : fixed;
   }
 
-  Future<void> _loadHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    final rawJson = prefs.getString(_historyStorageKey);
-    if (rawJson == null || rawJson.isEmpty) {
-      return;
+  bool _appendHistoryEntry(String expression, String result) {
+    if (_historyItems.isNotEmpty &&
+        _historyItems.first.expression == expression &&
+        _historyItems.first.result == result) {
+      return false;
     }
 
+    _historyItems.insert(
+      0,
+      HistoryEntry(expression: expression, result: result),
+    );
+    if (_historyItems.length > _maxHistoryItems) {
+      _historyItems.removeRange(_maxHistoryItems, _historyItems.length);
+    }
+    return true;
+  }
+
+  Future<void> _loadPersistedState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rawJson = prefs.getString(_historyStorageKey);
+    final persistedResult = prefs.getString(_resultStorageKey);
+    final persistedExpression = prefs.getString(_expressionStorageKey);
+    final persistedCompactView = prefs.getString(_compactViewStorageKey);
     try {
-      final decoded = jsonDecode(rawJson);
-      if (decoded is! List) {
-        return;
+      var loadedEntries = <HistoryEntry>[];
+      if (rawJson != null && rawJson.isNotEmpty) {
+        final decoded = jsonDecode(rawJson);
+        if (decoded is List) {
+          loadedEntries = decoded
+              .whereType<Map<String, dynamic>>()
+              .map(HistoryEntry.fromMap)
+              .where((entry) => entry.expression.trim().isNotEmpty)
+              .take(_maxHistoryItems)
+              .toList();
+        }
       }
-      final loadedEntries = decoded
-          .whereType<Map<String, dynamic>>()
-          .map(HistoryEntry.fromMap)
-          .where((entry) => entry.expression.trim().isNotEmpty)
-          .take(_maxHistoryItems)
-          .toList();
 
       if (!mounted) {
         return;
       }
 
       setState(() {
-        _historyItems
-          ..clear()
-          ..addAll(loadedEntries);
+        if (loadedEntries.isNotEmpty) {
+          _historyItems
+            ..clear()
+            ..addAll(loadedEntries);
+        }
+        if (persistedResult != null && persistedResult.isNotEmpty) {
+          _resultText = persistedResult;
+        }
+        if (persistedCompactView == _CompactPanelView.history.name) {
+          _compactPanelView = _CompactPanelView.history;
+        }
       });
+
+      if (persistedExpression != null &&
+          persistedExpression.trim().isNotEmpty) {
+        try {
+          final parsedExpression = TeXParser(persistedExpression).parse();
+          _expressionController.updateValue(parsedExpression);
+        } catch (_) {
+          _expressionController.clear();
+          _expressionController.addLeaf(persistedExpression);
+        }
+      }
     } catch (_) {
       // Ignore malformed persisted history and keep current in-memory defaults.
     }
+  }
+
+  Future<void> _saveState() async {
+    await Future.wait([_saveHistory(), _saveResult()]);
   }
 
   Future<void> _saveHistory() async {
@@ -253,6 +317,21 @@ class _CalculatorPageState extends State<CalculatorPage> {
       _historyItems.map((item) => item.toMap()).toList(),
     );
     await prefs.setString(_historyStorageKey, encoded);
+  }
+
+  Future<void> _saveResult() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_resultStorageKey, _resultText);
+  }
+
+  Future<void> _saveExpression(String expression) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_expressionStorageKey, expression);
+  }
+
+  Future<void> _saveCompactView() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_compactViewStorageKey, _compactPanelView.name);
   }
 
   /// Opens the standard Flutter about dialog for the application.
@@ -276,44 +355,56 @@ class _CalculatorPageState extends State<CalculatorPage> {
         title: widget.title,
         onAboutSelected: _showAboutDialog,
       ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final bool useSplitLayout =
-                constraints.maxWidth >= _splitLayoutWidth;
-            final double expressionHeight = (constraints.maxHeight * 0.22)
-                .clamp(120.0, 180.0);
-            const double resultHeight = 96.0;
+      body: CallbackShortcuts(
+        bindings: <ShortcutActivator, VoidCallback>{
+          const SingleActivator(LogicalKeyboardKey.enter): _calculateExpression,
+          const SingleActivator(LogicalKeyboardKey.numpadEnter):
+              _calculateExpression,
+        },
+        child: Focus(
+          autofocus: true,
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bool useSplitLayout =
+                    constraints.maxWidth >= _splitLayoutWidth;
+                final double expressionHeight = (constraints.maxHeight * 0.22)
+                    .clamp(120.0, 180.0);
+                const double resultHeight = 96.0;
 
-            return Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: expressionHeight,
-                    child: CalculatorExpressionField(
-                      controller: _expressionController,
-                      focusNode: _expressionFocusNode,
-                    ),
+                return Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: expressionHeight,
+                        child: CalculatorExpressionField(
+                          controller: _expressionController,
+                          focusNode: _expressionFocusNode,
+                          onSubmitRequested: _calculateExpression,
+                          errorText: _expressionErrorText,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: resultHeight,
+                        child: CalculatorResultBar(
+                          resultText: _resultText,
+                          onCalculatePressed: _calculateExpression,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: useSplitLayout
+                            ? _buildSplitContent()
+                            : _buildCompactContent(),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: resultHeight,
-                    child: CalculatorResultBar(
-                      resultText: _resultText,
-                      onCalculatePressed: _calculateExpression,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: useSplitLayout
-                        ? _buildSplitContent()
-                        : _buildCompactContent(),
-                  ),
-                ],
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -327,6 +418,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
             historyItems: _historyItems,
             onClearHistory: _clearHistory,
             onReuseEntry: _reuseHistoryEntry,
+            onDeleteEntry: _deleteHistoryEntry,
           ),
         ),
         const SizedBox(width: 10),
@@ -359,6 +451,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
               setState(() {
                 _compactPanelView = selection.first;
               });
+              _saveCompactView();
             },
           ),
         ),
@@ -377,6 +470,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                       historyItems: _historyItems,
                       onClearHistory: _clearHistory,
                       onReuseEntry: _reuseHistoryEntry,
+                      onDeleteEntry: _deleteHistoryEntry,
                     ),
                   ),
           ),
