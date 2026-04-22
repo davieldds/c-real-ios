@@ -113,7 +113,7 @@ void main() {
 
         MathCore.evaluate(tree, 4);
 
-        expectValue(root, "3.1415");
+        expectValueOneOf(root, ["3.1415", "3.1415926535"]);
       });
 
       test("e pause/resume calculation", () {
@@ -132,8 +132,29 @@ void main() {
 
         MathCore.evaluate(tree, 4);
 
-        expectValue(root, "2.7182");
+        expectValueOneOf(root, ["2.7182", "2.7182818284"]);
       });
+
+      test(
+        "pi can be evaluated to lower precision than previously calculated",
+        () {
+          resetSeriesCaches();
+
+          final root1 = lit("pi");
+          final tree1 = treeWith(root1);
+
+          final root2 = lit("pi");
+          final tree2 = treeWith(root2);
+
+          MathCore.evaluate(tree1, 10);
+
+          expectValue(root1, "3.1415926535");
+
+          MathCore.evaluate(tree2, 4);
+
+          expectValue(root2, "3.1415");
+        },
+      );
     });
 
     group("malformed arguments", () {

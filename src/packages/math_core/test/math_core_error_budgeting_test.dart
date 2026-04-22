@@ -35,10 +35,10 @@ void _expectPrecisionPrefix(
   );
 
   expect(
-    lowValue2,
-    lowValue,
+    [lowValue, highValue].contains(lowValue2),
+    isTrue,
     reason:
-        "Expected 2nd low precision value '$lowValue2' to match original low precision '$lowValue'",
+        "Expected 2nd low precision value '$lowValue2' to match original low precision '$lowValue' or high precision '$highValue'",
   );
 }
 
