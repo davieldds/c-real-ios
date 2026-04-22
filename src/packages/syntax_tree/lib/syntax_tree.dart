@@ -1,29 +1,27 @@
+import 'package:syntax_tree/utils.dart';
 import 'package:syntax_tree/expression.dart';
+import 'package:syntax_tree/parser.dart';
+
+/// @author Lukas Pollak
+/// This file defines the [SyntaxTree] class, which represents a syntax tree for mathematical equations
 
 class SyntaxTree {
   Expression? root;
 
   SyntaxTree([this.root]);
 
+  /// Clears the syntax tree by setting the root to null.
   void clear() {
-    // deletes the tree
+    root = null;
   }
 
-  void addExpression(Object input) {
-    // add expression to tree
+  /// Parses a mathematical equation from a string input and constructs a syntax tree representation of the equation. It uses the [EquationParser] to perform the parsing and updates the root of the syntax tree with the resulting expression.
+  void parseEquation(String equation) {
+    clear();
+    root = EquationParser(equation).parse();
   }
 
-  void removeExpression(Expression exp) {
-    // remove expression from tree
-  }
-
-  List<Expression>? getErrorExpresions() {
-    // returns list of expressions with error
-    return null;
-  }
-
-  List<Expression>? getLeafExpressions() {
-    // returns list of leaf expressions
-    return null;
+  void printTree() {
+    printSyntaxTree(this);
   }
 }

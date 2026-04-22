@@ -231,10 +231,11 @@ packages:
   math_keyboard:
     dependency: "direct main"
     description:
-      name: math_keyboard
-      sha256: "162a095235e04ed2c5e5cba8a55c054c6305a1d26c9c4e36b5e6bac107ed4a9d"
-      url: "https://pub.dev"
-    source: hosted
+      path: math_keyboard
+      ref: "0b1b338b31125569828dc42560c4883077c68f70"
+      resolved-ref: "0b1b338b31125569828dc42560c4883077c68f70"
+      url: "https://github.com/lpollak06/math_keyboard.git"
+    source: git
     version: "0.3.3"
   meta:
     dependency: transitive
@@ -418,7 +419,7 @@ packages:
     source: hosted
     version: "1.4.1"
   syntax_tree:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "packages/syntax_tree"
       relative: true

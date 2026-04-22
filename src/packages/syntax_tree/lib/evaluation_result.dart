@@ -12,6 +12,13 @@ abstract class EvaluationResult {
   /// Whether the result is exactly zero. This is only true for [RationalResult]s where the numerator is 0 as for [RealResult]s
   /// we can never be sure whether it isn't just an error of approximation.
   bool get isZero => false;
+
+  @override
+  toString() => value;
+
+  double toDouble() {
+    return double.tryParse(value) ?? double.nan;
+  }
 }
 
 /// Variant of [EvaluationResult] for when the result cannot be calculated in the realm of rational numbers.

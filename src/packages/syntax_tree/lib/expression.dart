@@ -1,30 +1,28 @@
 import 'package:syntax_tree/evaluation_result.dart';
 
+/// @author Lukas Pollak
+/// This file defines the base classes for expressions in the syntax tree, including binary and unary expressions.
+
+/// Base class for all expressions in the syntax tree.
+/// Construtor: [Expression] - Initializes an expression with an optional evaluation result value.
 class Expression {
   Expression? parent;
   EvaluationResult? value;
 
-  Expression({this.parent, this.value});
-
-  void replaceWith(Expression replacement) {
-    // replace expression with different one
-  }
-
-  void applyExpression(Object op, {Expression? nextExpression}) {
-    // applies operation onto Expression,
-    // optionally bind next Expression and the other argument
-  }
+  Expression({this.value});
 }
 
+/// Represents a binary expression with two arguments of type [Expression].
 class BinaryExpression extends Expression {
   Expression? leftArg;
   Expression? rightArg;
 
-  BinaryExpression({super.parent, super.value, this.leftArg, this.rightArg});
+  BinaryExpression({super.value, this.leftArg, this.rightArg});
 }
 
+/// Represents a unary expression with a single argument of type [Expression].
 class UnaryExpression extends Expression {
   Expression? arg;
 
-  UnaryExpression({super.parent, super.value, this.arg});
+  UnaryExpression({super.value, this.arg});
 }

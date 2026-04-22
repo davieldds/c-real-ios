@@ -36,10 +36,17 @@ dependencies:
     cupertino_icons: ^1.0.9
     math_core:
         path: packages/math_core
+    syntax_tree:
+        path: packages/syntax_tree
     exui: ^1.0.11
-    math_keyboard: ^0.3.3
+    math_keyboard:
+        git:
+            url: https://github.com/lpollak06/math_keyboard.git
+            ref: 0b1b338b31125569828dc42560c4883077c68f70
+            path: math_keyboard
+        # path: ../../math_keyboard/math_keyboard
     math_expressions: ^2.7.0
-    shared_preferences: ^2.5.3
+    shared_preferences: ^2.5.5
 
 dev_dependencies:
     flutter_test:
@@ -61,7 +68,6 @@ flutter:
     # included with your application, so that you can use the icons in
     # the material Icons class.
     uses-material-design: true
-
     # To add assets to your application, add an assets section, like this:
     # assets:
     #   - images/a_dot_burr.jpeg

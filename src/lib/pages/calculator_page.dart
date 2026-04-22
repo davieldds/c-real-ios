@@ -3,12 +3,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:math_expressions/math_expressions.dart';
+import 'package:math_core/math_core.dart';
 import 'package:math_keyboard/math_keyboard.dart';
+import 'package:syntax_tree/syntax_tree.dart';
 // ignore: implementation_imports
 import 'package:math_keyboard/src/foundation/node.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/custom_tex_parser.dart';
 import '../models/function_button_data.dart';
 import '../models/history_entry.dart';
 import '../widgets/calculator_app_bar.dart';
@@ -61,16 +63,22 @@ class _CalculatorPageState extends State<CalculatorPage> {
   static const List<List<FunctionButtonData>> _functionRows = [
     [
       FunctionButtonData(label: '|x|', insertion: 'abs()'),
-      FunctionButtonData(label: 'π', insertion: r'\pi'),
-      FunctionButtonData(label: 'e', insertion: 'e'),
+      FunctionButtonData(
+        label: 'π',
+        insertion:
+            '{'
+            r'\pi'
+            '}',
+      ),
+      FunctionButtonData(label: 'e', insertion: '{e}'),
       FunctionButtonData(label: 'log', insertion: r'\log_'),
       FunctionButtonData(label: 'ln', insertion: r'\ln'),
     ],
     [
-      FunctionButtonData(label: 'mod', insertion: r'\mod'),
+      FunctionButtonData(label: 'nrt', insertion: r'\nrt_'),
       FunctionButtonData(label: '!', insertion: '!'),
       FunctionButtonData(label: '√', insertion: r'\sqrt{'),
-      FunctionButtonData(label: 'x²', insertion: '^2'),
+      FunctionButtonData(label: 'x²', insertion: '^{2}'),
       FunctionButtonData(label: 'xʸ', insertion: '^'),
     ],
     [
@@ -97,7 +105,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
     [
       FunctionButtonData(label: '0', insertion: '0', isNumber: true),
       FunctionButtonData(label: '.', insertion: '.', isNumber: true),
-      FunctionButtonData(label: '%', insertion: '%'),
+      FunctionButtonData(label: '%', insertion: r'\%'),
       FunctionButtonData(label: '←', insertion: '__LEFT__'),
       FunctionButtonData(label: '→', insertion: '__RIGHT__'),
     ],
@@ -118,24 +126,14 @@ class _CalculatorPageState extends State<CalculatorPage> {
         if (!mounted) {
           return;
         }
-        try {
-          final parsedExpression = TeXParser(tex).parse();
-          final double value = parsedExpression.evaluate(
-            EvaluationType.REAL,
-            ContextModel(),
-          );
-          final String previewText = tex.trim().isEmpty
-              ? ''
-              : _formatResult(value);
-          if (_expressionErrorText != null || _resultText != previewText) {
-            setState(() {
-              _expressionErrorText = null;
-              _resultText = previewText;
-            });
-            _saveResult();
-          }
-        } catch (_) {
-          // Keep the last valid result while typing invalid intermediate syntax.
+        if (tex.trim().isEmpty) {
+          setState(() {
+            _expressionErrorText = null;
+            _resultText = '';
+          });
+          _saveResult();
+        } else {
+          _calculateExpression();
         }
       });
     });
@@ -157,6 +155,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
       _expressionController.goNext();
     } else if (text == r'\sqrt{') {
       _expressionController.addFunction(r'\sqrt', [TeXArg.braces]);
+    } else if (text == r'\nrt_') {
+      _expressionController.addFunction(r'\sqrt', [
+        TeXArg.brackets,
+        TeXArg.braces,
+      ]);
     } else if (text == '^') {
       _expressionController.addFunction('^', [TeXArg.braces]);
     } else if (text == r'\log_') {
@@ -174,8 +177,6 @@ class _CalculatorPageState extends State<CalculatorPage> {
       r'\tan^{-1}',
     ].contains(text)) {
       _expressionController.addFunction(text, [TeXArg.parentheses]);
-    } else if (text == 'abs()') {
-      _expressionController.addLeaf('|');
     } else {
       _expressionController.addLeaf(text);
     }
@@ -192,11 +193,14 @@ class _CalculatorPageState extends State<CalculatorPage> {
     _expressionFocusNode.requestFocus();
   }
 
+  final SyntaxTree tree = SyntaxTree();
+
   /// Evaluates the expression and stores it as a history item.
   void _calculateExpression() {
     final String tex = _expressionController.currentEditingValue(
       placeholderWhenEmpty: false,
     );
+    debugPrint('Calculating expression: $tex');
     if (tex.trim().isEmpty) {
       setState(() {
         _expressionErrorText = 'Enter an expression.';
@@ -205,12 +209,22 @@ class _CalculatorPageState extends State<CalculatorPage> {
     }
 
     try {
-      final parsedExpression = TeXParser(tex).parse();
-      final double value = parsedExpression.evaluate(
-        EvaluationType.REAL,
-        ContextModel(),
-      );
-      final String formattedResult = _formatResult(value);
+      final parsedExpression = CustomTeXParser(tex).parse();
+      debugPrint('Parsed expression: $parsedExpression');
+
+      tree.clear();
+      tree.parseEquation(parsedExpression.toString());
+      tree.printTree();
+
+      MathCore.evaluate(tree, 10);
+
+      final value = tree.root?.value;
+      final String formattedResult;
+      if (value == null) {
+        throw FormatException('Evaluation did not produce a result.');
+      } else {
+        formattedResult = value.toString();
+      }
 
       setState(() {
         _resultText = formattedResult;
@@ -218,7 +232,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
         _appendHistoryEntry(tex, formattedResult);
       });
       _saveState();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Error evaluating expression: $e');
       setState(() {
         _resultText = 'Error';
         _expressionErrorText = 'Invalid expression. Please check syntax.';
@@ -243,26 +258,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
   /// Restores a history entry expression into the editor.
   void _reuseHistoryEntry(HistoryEntry entry) {
     try {
-      final parsedExpression = TeXParser(entry.expression).parse();
+      final parsedExpression = CustomTeXParser(entry.expression).parse();
       _expressionController.updateValue(parsedExpression);
     } catch (_) {
       _clearExpression();
       _expressionController.addLeaf(entry.expression);
     }
     _expressionFocusNode.requestFocus();
-  }
-
-  String _formatResult(double value) {
-    if (value.isNaN || value.isInfinite) {
-      return value.toString();
-    }
-
-    final String fixed = value.toStringAsFixed(10);
-    return fixed.contains('.')
-        ? fixed
-              .replaceFirst(RegExp(r'0+$'), '')
-              .replaceFirst(RegExp(r'\.$'), '')
-        : fixed;
   }
 
   bool _appendHistoryEntry(String expression, String result) {
@@ -323,7 +325,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
       if (persistedExpression != null &&
           persistedExpression.trim().isNotEmpty) {
         try {
-          final parsedExpression = TeXParser(persistedExpression).parse();
+          final parsedExpression = CustomTeXParser(persistedExpression).parse();
           _expressionController.updateValue(parsedExpression);
         } catch (_) {
           _expressionController.clear();

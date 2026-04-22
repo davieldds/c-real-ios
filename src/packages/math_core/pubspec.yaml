@@ -5,10 +5,13 @@ version: 0.1.0
 
 environment:
     sdk: ^3.11.1
+    flutter: ">=1.17.0"
 
 dependencies:
     syntax_tree:
         path: ../syntax_tree
+    flutter:
+        sdk: flutter
 
 dev_dependencies:
     lints: ^6.1.0

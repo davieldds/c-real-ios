@@ -15,14 +15,17 @@ void main() {
     test('Constructor with parameters', () {
       final parent = Expression();
       final result = ErrorResult('Err');
-      final expr = Expression(parent: parent, value: result);
+
+      final expr = Expression(value: result);
+      expr.parent = parent;
 
       expect(expr.parent, same(parent));
       expect(expr.value, same(result));
     });
 
     test('Constructor with null parameters', () {
-      final expr = Expression(parent: null, value: null);
+      final expr = Expression(value: null);
+      expr.parent = null;
 
       expect(expr.parent, isNull);
       expect(expr.value, isNull);
