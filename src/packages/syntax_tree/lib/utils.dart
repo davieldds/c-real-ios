@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:syntax_tree/expression.dart';
 import 'package:syntax_tree/expression_types.dart';
 import 'package:syntax_tree/syntax_tree.dart';
@@ -15,7 +14,7 @@ String syntaxTreeToString(SyntaxTree tree) {
 
 void printSyntaxTree(SyntaxTree tree) {
   for (final line in syntaxTreeToString(tree).split('\n')) {
-    debugPrint(line);
+    print(line);
   }
 }
 

@@ -424,7 +424,7 @@ packages:
       path: "packages/syntax_tree"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "1.0.0"
   term_glyph:
     dependency: transitive
     description:
