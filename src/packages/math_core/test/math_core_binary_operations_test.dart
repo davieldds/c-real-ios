@@ -271,6 +271,71 @@ void main() {
       });
     });
 
+    group("ln and log", () {
+      test("evaluates natural logarithm", () {
+        final root = ln(lit("e"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValueOneOf(root, ["1", "1.0000"]);
+      });
+
+      test("evaluates common logarithm", () {
+        final root = log(lit("100.0"), lit("10.0"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValueOneOf(root, ["2", "2.0000"]);
+      });
+
+      test("ln of a negative number reports error", () {
+        final root = ln(sub(lit("0.0"), lit("1.0")));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectErrorIsNotEmpty(root);
+      });
+
+      test("log of a negative number reports error", () {
+        final root = log(sub(lit("0.0"), lit("1.0")), lit("10.0"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectErrorIsNotEmpty(root);
+      });
+
+      test("ln of zero reports error", () {
+        final root = ln(lit("0.0"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectErrorIsNotEmpty(root);
+      });
+
+      test("log with base 1 reports error", () {
+        final root = log(lit("10.0"), lit("1.0"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectErrorIsNotEmpty(root);
+      });
+
+      test("log with non-positive base reports error", () {
+        final root = log(lit("10.0"), sub(lit("0.0"), lit("2.0")));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectErrorIsNotEmpty(root);
+      });
+    });
+
     group("nested binary expressions", () {
       test("evaluates a mixed tree left-to-right", () {
         final root = mul(add(lit("1.0"), lit("2.0")), lit("3.0"));

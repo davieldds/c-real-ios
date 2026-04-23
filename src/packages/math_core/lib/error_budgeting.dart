@@ -72,6 +72,13 @@ class ErrorBudgeting {
         // remains linearly bounded. 2 guard bits strictly absorb rounding and guarantee precision.
         return normalizedPrecision + 2;
 
+      case LnExpression():
+        // ln(x) has derivative 1/x. When |x| < 1, absolute error is amplified,
+        // so we budget extra bits equal to the negative magnitude plus guard bits.
+        final mag = _getMagnitude(childResult);
+        final extra = mag < 0 ? -mag + 3 : 3;
+        return normalizedPrecision + extra;
+
       default:
         // This code path should never be reached but just to be safe we return a default precision budget of 2 guard bits
         return normalizedPrecision + 2;
@@ -93,6 +100,16 @@ class ErrorBudgeting {
       case MulExpression():
       case DivExpression():
       case PwrExpression():
+        final leftMag = _getMagnitude(binary.leftArg!.value);
+        final rightMag = _getMagnitude(binary.rightArg!.value);
+        return (
+          normalizedPrecision + rightMag + 3,
+          normalizedPrecision + leftMag + 3,
+        );
+
+      case LogExpression():
+        // log_a(b) = ln(b) / ln(a) behaves like a division of two non-linear functions,
+        // so we budget magnitude-based guard bits for both operands.
         final leftMag = _getMagnitude(binary.leftArg!.value);
         final rightMag = _getMagnitude(binary.rightArg!.value);
         return (

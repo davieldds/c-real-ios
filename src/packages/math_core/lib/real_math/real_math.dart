@@ -8,4 +8,5 @@ import 'package:syntax_tree/expression_types.dart';
 part 'real_math_interface.dart';
 part 'real_math_helpers.dart';
 part 'real_math_basic_ops.dart';
+part 'real_math_log.dart';
 part 'real_math_power.dart';

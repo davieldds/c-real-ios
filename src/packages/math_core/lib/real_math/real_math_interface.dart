@@ -31,6 +31,9 @@ class RealMath {
       case FactExpression fact:
         return _evaluateFactExpression(fact, normalizedPrecision);
 
+      case LnExpression ln:
+        return _evaluateLnExpression(ln, normalizedPrecision);
+
       default:
         expression.value = ErrorResult(
           "Unsupported unary operation: ${expression.runtimeType}",
@@ -57,6 +60,9 @@ class RealMath {
 
       case PwrExpression pwr:
         return _evaluatePwrExpression(pwr, normalizedPrecision);
+
+      case LogExpression log:
+        return _evaluateLogExpression(log, normalizedPrecision);
 
       default:
         expression.value = ErrorResult(

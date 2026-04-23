@@ -49,6 +49,16 @@ FactExpression fact(Expression arg) {
   return FactExpression(arg: arg);
 }
 
+/// Creates a [LnExpression] with the given [arg] expression.
+LnExpression ln(Expression arg) {
+  return LnExpression(arg: arg);
+}
+
+/// Creates a [LogExpression] with the given [left] and [right] expressions.
+LogExpression log(Expression left, Expression right) {
+  return LogExpression(leftArg: left, rightArg: right);
+}
+
 /// Helper to assert that an [expression] has a non-null value and return it for further assertions.
 EvaluationResult _requireResult(Expression expression) {
   expect(expression.value, isNotNull);
