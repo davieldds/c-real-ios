@@ -1,8 +1,10 @@
 import 'package:math_core/error_budgeting.dart';
 import 'package:math_core/literals/literals.dart';
+import 'package:math_core/math_core_config.dart';
 import 'package:math_core/rational_math/rational_approximation.dart';
 import 'package:math_core/rational_math/rational_math.dart';
 import 'package:math_core/real_math/real_math.dart';
+import 'package:math_core/size_limits.dart';
 import 'package:syntax_tree/expression.dart';
 import 'package:syntax_tree/expression_types.dart';
 import 'package:syntax_tree/syntax_tree.dart';
@@ -51,7 +53,16 @@ class MathCore {
   }
 
   /// Recursively evaluates the value of the given [expression] to the specified [precision].
-  static void evaluateExpression(Expression expression, int precision) {
+  static void evaluateExpression(
+    Expression expression,
+    int precision, [
+    int depth = 0,
+  ]) {
+    if (depth > MathCoreConfig.maxAstDepth) {
+      expression.value = ErrorResult("Expression tree too deep");
+      return;
+    }
+
     // Check, whether we can reuse the cached result
     if (_canUseCached(expression.value, precision)) return;
 
@@ -64,12 +75,12 @@ class MathCore {
 
       // sqrt, fact, etc.
       case UnaryExpression():
-        _handleUnary(expression, precision);
+        _handleUnary(expression, precision, depth);
         break;
 
       // +, ×, etc.
       case BinaryExpression():
-        _handleBinary(expression, precision);
+        _handleBinary(expression, precision, depth);
         break;
 
       default:
@@ -95,7 +106,7 @@ class MathCore {
   }
 
   /// Helper function that evaluates a [unary] expression to the specified [precision].
-  static void _handleUnary(UnaryExpression unary, int precision) {
+  static void _handleUnary(UnaryExpression unary, int precision, int depth) {
     final child = unary.arg;
 
     // Check that the argument exists
@@ -105,11 +116,17 @@ class MathCore {
     }
 
     // Approximate the magnitude of the child expression to calculate it's required precision for this unary operation
-    ErrorBudgeting.evaluateMagnitude(child);
+    ErrorBudgeting.evaluateMagnitude(child, depth + 1);
 
     // If evaluation of the child subtree errored, this node is indeterminate
     if (child.value is ErrorResult || child.value is IndeterminateResult) {
       unary.value = IndeterminateResult();
+      return;
+    }
+
+    final limitError = SizeLimits.checkLimits(unary);
+    if (limitError != null) {
+      unary.value = limitError;
       return;
     }
 
@@ -121,7 +138,7 @@ class MathCore {
     );
 
     // Evaluate the argument subtree to its required precision
-    evaluateExpression(child, requiredChildPrecision);
+    evaluateExpression(child, requiredChildPrecision, depth + 1);
 
     // Based on the result of the child expression evaluation, pick the appropriate logic for the result of this expression
     switch (child.value) {
@@ -144,7 +161,7 @@ class MathCore {
   }
 
   /// Helper function that evaluates a [binary] expression to the specified [precision].
-  static void _handleBinary(BinaryExpression binary, int precision) {
+  static void _handleBinary(BinaryExpression binary, int precision, int depth) {
     final left = binary.leftArg, right = binary.rightArg;
 
     // Check that both arguments exist
@@ -154,8 +171,8 @@ class MathCore {
     }
 
     // Iteratively evaluate to estimate magnitudes
-    ErrorBudgeting.evaluateMagnitude(left);
-    ErrorBudgeting.evaluateMagnitude(right);
+    ErrorBudgeting.evaluateMagnitude(left, depth + 1);
+    ErrorBudgeting.evaluateMagnitude(right, depth + 1);
 
     // If evaluation of any of the subtrees errored, this node is indeterminate
     if (left.value is ErrorResult ||
@@ -163,6 +180,12 @@ class MathCore {
         right.value is ErrorResult ||
         right.value is IndeterminateResult) {
       binary.value = IndeterminateResult();
+      return;
+    }
+
+    final limitError = SizeLimits.checkLimits(binary);
+    if (limitError != null) {
+      binary.value = limitError;
       return;
     }
 
@@ -179,8 +202,8 @@ class MathCore {
         ErrorBudgeting.getBinaryPrecisions(binary, precision);
 
     // Evaluate both argument subtrees to their calculated required precision
-    evaluateExpression(left, requiredLeftPrecision);
-    evaluateExpression(right, requiredRightPrecision);
+    evaluateExpression(left, requiredLeftPrecision, depth + 1);
+    evaluateExpression(right, requiredRightPrecision, depth + 1);
 
     // Ensure both arguments have a constructive real approximation
     if (left.value is RationalResult)

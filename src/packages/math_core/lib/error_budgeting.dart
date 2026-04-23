@@ -1,14 +1,8 @@
 import 'package:math_core/math_core.dart';
+import 'package:math_core/math_core_config.dart';
 import 'package:syntax_tree/expression.dart';
 import 'package:syntax_tree/expression_types.dart';
 import 'package:syntax_tree/evaluation_result.dart';
-
-/// In Constructive Real Arithmetic the computation required to evaluate a 0 expression
-/// is infinite. To prevent infinite loops when trying to find the magnitude of very small numbers,
-/// we set a reasonable precision limit after which we assume the number is effectively zero and stop the search.
-///
-/// Numbers smaller that 2^-[_ASUME_ZERO_PRECISION] are thus considered zero for the purpose of error budgeting
-const _ASUME_ZERO_PRECISION = 128;
 
 /// Helper class to calculate the required dynamic precision for child expressions
 /// based on mathematical operations and their evaluated magnitudes.
@@ -25,11 +19,11 @@ class ErrorBudgeting {
   /// To budget errors correctly (especially for operations like division where a
   /// tiny denominator massively scales the error), we must iteratively increase
   /// the precision until a non-zero digit is found, revealing the true MSB.
-  static void evaluateMagnitude(Expression expression) {
+  static void evaluateMagnitude(Expression expression, [int depth = 0]) {
     int precision = 0;
 
     // Start with a quick evaluation at low precision to catch large magnitudes without overhead
-    MathCore.evaluateExpression(expression, precision);
+    MathCore.evaluateExpression(expression, precision, depth);
 
     // If we already have a non-zero representation, the magnitude is already measurable
     if ((expression.value is RealResult &&
@@ -42,7 +36,7 @@ class ErrorBudgeting {
     // Start the iterative search for the MSB
     precision = 4;
     while (true) {
-      MathCore.evaluateExpression(expression, precision);
+      MathCore.evaluateExpression(expression, precision, depth);
 
       // If we found a non-zero representation, the magnitude is now measurable
       if (expression.value is RealResult &&
@@ -50,7 +44,7 @@ class ErrorBudgeting {
         return;
 
       // To prevent infinite loops on very small numbers
-      if (precision > _ASUME_ZERO_PRECISION) return;
+      if (precision > MathCoreConfig.assumeZeroPrecision) return;
 
       // Increase precision exponentially to quickly find the MSB
       precision <<= 1;
