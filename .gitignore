@@ -12,6 +12,7 @@
 
 # Build output
 **/dist/
+src/windows/packaging/exe/Output/
 
 # Flutter repo-specific
 src/bin/cache/

@@ -1,33 +1,33 @@
-display_name: Hello World
-package_name: hello-world
+display_name: C-Real
+package_name: c-real
 maintainer:
-  name: LiJianying
-  email: lijy91@foxmail.com
+  name: Lukas Pollak
+  email: xpollal00@vutbr.cz
 co_authors:
-  - name: Kingkor Roy Tirtho
-    email: krtirtho@gmail.com
+  - name: Jan Kostka
+    email: xkostkj00@vutbr.cz
+  - name: David Alois Bureš
+    email: xburesd00@vutbr.cz
 priority: optional
 section: x11
-installed_size: 6604
+installed_size: 37007
 essential: false
-icon: linux/assets/icon.png
+icon: assets/logo/logo2k.png
 
 postinstall_scripts:
-  - echo "Installed my awesome app"
+  - echo "C-Real was installer :D"
 postuninstall_scripts:
-  - echo "Surprised Pickachu face"
+  - echo "Good bye D:"
 
 keywords:
-  - Hello
-  - World
-  - Test
+  - Calculator
+  - C-Real
   - Application
 
-generic_name: Music Application
+generic_name: Calculator Application
 
 categories:
-  - Music
-  - Media
+  - utils
 
 startup_notify: true
 # You can also specify [metainfo](https://freedesktop.org/software/appstream/docs/chap-Quickstart.html) file

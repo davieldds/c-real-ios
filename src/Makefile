@@ -1,4 +1,6 @@
-.PHONY: all pack clean test doc run stddev help install FORCE
+.PHONY: all pack clean test doc run stddev help install release FORCE
+
+PLATFORM ?= windows
 
 # Default target: make == make all
 all: install test stddev
@@ -14,6 +16,7 @@ help:
 	@echo "  make run      - run application"
 	@echo "  make stddev   - build stddev profiling executable"
 	@echo "  make install  - install dependencies"
+	@echo "  make release PLATFORM=[windows/linux]  - build installers"
 	@echo "  make test     - analyze and run tests"
 	@echo "  make help     - show this help"
 
@@ -62,5 +65,22 @@ clean:
 	find . -type d -name ".dart_tool" -prune -exec rm -rf {} +
 	find . -type d -path "*/doc/api" -prune -exec rm -rf {} +
 	find . -type d -name ".flutter-plugins-dependencies" -prune -exec rm -rf {} +
+
+guard-%:
+	@if [ -z "$(${*})" ]; then \
+		echo "Error: ${*} is required"; \
+		exit 1; \
+	fi
+
+release: guard-PLATFORM
+	@if [ "$(PLATFORM)" = "windows" ]; then \
+		fastforge package --platform windows --targets exe,msix; \
+	elif [ "$(PLATFORM)" = "linux" ]; then \
+		fastforge package --platform linux --targets deb; \
+	else \
+		echo "make release PLATFORM=windows"; \
+		echo "make release PLATFORM=linux"; \
+		exit 1; \
+	fi
 
 FORCE:

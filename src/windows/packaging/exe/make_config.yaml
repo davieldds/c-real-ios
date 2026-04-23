@@ -1,0 +1,14 @@
+# The value of AppId uniquely identifies this application.
+# Do not use the same AppId value in installers for other applications.
+script_template: creal.iss
+app_id: c0f3f027-fd92-4770-962a-dd92478c62d8
+publisher: "|Object object|"
+publisher_url: https://c-real.krychlic.com/
+display_name: C-Real
+create_desktop_icon: true
+# See: https://jrsoftware.org/ishelp/index.php?topic=setup_defaultdirname
+install_dir_name: "{autopf}\\creal"
+# This path is relative to the root directory of your project; The format of icon file must be ico, can not be png or others
+setup_icon_file: assets/logo/logo.ico
+locales:
+  - en

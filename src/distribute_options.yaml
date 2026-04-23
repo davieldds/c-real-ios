@@ -6,3 +6,11 @@ releases:
         package:
           platform: linux
           target: deb
+      - name: ivs-project-2-msix
+        package:
+          platform: windows
+          target: msix
+      - name: ivs-project-2-exe
+        package:
+          platform: windows
+          target: exe
