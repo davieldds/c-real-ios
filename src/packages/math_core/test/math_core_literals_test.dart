@@ -37,6 +37,36 @@ void main() {
         expectDecimalValue(root, "42.0000");
       });
 
+      test("negative integer", () {
+        final root = lit("-42.0");
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValue(root, "-42");
+        expectDecimalValue(root, "-42.0000");
+      });
+
+      test("integer without the decimal point", () {
+        final root = lit("42");
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValue(root, "42");
+        expectDecimalValue(root, "42.0000");
+      });
+
+      test("negative integer without the decimal point", () {
+        final root = lit("-42");
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValue(root, "-42");
+        expectDecimalValue(root, "-42.0000");
+      });
+
       test("positive decimal smaller than 1", () {
         final root = lit("0.7177");
         final tree = treeWith(root);
@@ -55,6 +85,26 @@ void main() {
 
         expectValue(root, "6283/2000");
         expectDecimalValue(root, "3.1415");
+      });
+
+      test("negative decimal smaller than 1", () {
+        final root = lit("-0.7177");
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValue(root, "-7177/10000");
+        expectDecimalValue(root, "-0.7177");
+      });
+
+      test("negative decimal larger than 1", () {
+        final root = lit("-3.1415");
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValue(root, "-6283/2000");
+        expectDecimalValue(root, "-3.1415");
       });
 
       test("very small decimal", () {
@@ -168,18 +218,6 @@ void main() {
       });
 
       test(
-        "literal with invalid argument reports error (missing decimal separator)",
-        () {
-          final root = lit("1");
-          final tree = treeWith(root);
-
-          MathCore.evaluate(tree, 4);
-
-          expectErrorIsNotEmpty(root);
-        },
-      );
-
-      test(
         "literal with invalid argument reports error (multiple decimal separators)",
         () {
           final root = lit("1.2.3");
@@ -193,15 +231,6 @@ void main() {
 
       test("literal with invalid argument reports error (non-numeric)", () {
         final root = lit("abc.def");
-        final tree = treeWith(root);
-
-        MathCore.evaluate(tree, 4);
-
-        expectErrorIsNotEmpty(root);
-      });
-
-      test("literal with invalid argument reports error (negative number)", () {
-        final root = lit("-1");
         final tree = treeWith(root);
 
         MathCore.evaluate(tree, 4);

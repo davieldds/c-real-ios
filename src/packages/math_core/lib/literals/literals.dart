@@ -14,12 +14,36 @@ class Literals {
 
   /// Evaluates the value of a rational [literal] (e.g. 1, -0.5, etc.).
   static void evaluateRationalLiteral(LiteralExpression literal) {
+    // First check for a leading '-' sign to determine if the literal is negative, and remove it for further processing.
+    bool isNegative = false;
+    if (literal.equationForm.startsWith('-')) {
+      isNegative = true;
+      literal.equationForm = literal.equationForm.substring(1);
+    }
+
     // Split the string representation of the literal into its components (e.g. "1.5" -> ["1", "5"])
     final components = literal.equationForm.split('.');
 
-    // All literals must have exactly 2 components (e.g. "1.0" is valid, but "1" and "1.5.3" are not)
-    if (components.length != 2) {
-      literal.value = ErrorResult('Invalid literal: ${literal.equationForm}');
+    // All literals must have at most 2 components (e.g. "1.0" and "1" are valid, but "1.5.3" is not)
+    if (components.length > 2) {
+      literal.value = ErrorResult(
+        'Invalid literal: ${isNegative ? "-" : ""}${literal.equationForm}',
+      );
+      return;
+    }
+
+    // Handle the case of an integer literal without a decimal point (e.g. "1")
+    if (components.length == 1) {
+      if (!RegExp(r'^\d+$').hasMatch(components[0])) {
+        literal.value = ErrorResult('Invalid literal: ${literal.equationForm}');
+        return;
+      }
+
+      final numerator = BigInt.parse(components[0]);
+      literal.value = RationalResult(
+        numerator: isNegative ? -numerator : numerator,
+        denominator: BigInt.one,
+      );
       return;
     }
 
@@ -36,7 +60,7 @@ class Literals {
 
     // Store the result in the literal's value
     literal.value = RationalResult(
-      numerator: numerator,
+      numerator: isNegative ? -numerator : numerator,
       denominator: denominator,
     );
   }
