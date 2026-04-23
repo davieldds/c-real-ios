@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "src" "\0"
+            VALUE "CompanyName", "IVS Projekt 2 Team" "\0"
+            VALUE "FileDescription", "C-Real Scientific Calculator" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "src" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "src.exe" "\0"
-            VALUE "ProductName", "src" "\0"
+            VALUE "InternalName", "c_real" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 IVS Projekt 2 Team. All rights reserved." "\0"
+            VALUE "OriginalFilename", "c_real.exe" "\0"
+            VALUE "ProductName", "C-Real" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

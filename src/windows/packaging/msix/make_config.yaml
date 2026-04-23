@@ -1,0 +1,8 @@
+display_name: "C-Real"
+msix_version: "1.0.0.0"
+publisher_display_name: "|Object object|"
+identity_name: "Objectobject.C-Real"
+family_name: "Objectobject.C-Real_nbwjyzwzs8k12"
+publisher: "CN=804F7F82-DFA4-475E-B592-E076C1BBE33A"
+sign_msix: "false"
+logo_path: ./assets/logo/logo512.png

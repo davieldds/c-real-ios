@@ -38,6 +38,9 @@ class CalculatorPage extends StatefulWidget {
 /// used by the calculator UI.
 class _CalculatorPageState extends State<CalculatorPage> {
   static const double _splitLayoutWidth = 980;
+  static const String _brandLogoAsset = 'assets/logo/logo512.png';
+  static const String _brandCatAsset = 'assets/logocat/logocat512.png';
+  static const String _brandTitleAsset = 'assets/title/title500.png';
   static const String _historyStorageKey = 'calculator.history';
   static const String _resultStorageKey = 'calculator.result';
   static const String _expressionStorageKey = 'calculator.expression';
@@ -370,9 +373,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
       context: context,
       applicationName: widget.title,
       applicationVersion: '1.0.0',
-      applicationIcon: const Icon(Icons.calculate_outlined),
-      children: const [
-        Text('Scientific calculator for the IVS Projekt 2 team project.'),
+      applicationIcon: Image.asset(_brandLogoAsset, width: 48, height: 48),
+      children: [
+        const Text('Scientific calculator for the IVS Projekt 2 team project.'),
+        const SizedBox(height: 8),
+        Center(
+          child: Image.asset(_brandCatAsset, width: 120, fit: BoxFit.contain),
+        ),
       ],
     );
   }
@@ -383,6 +390,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
     return Scaffold(
       appBar: CalculatorAppBar(
         title: widget.title,
+        titleAssetPath: _brandTitleAsset,
+        logoAssetPath: _brandLogoAsset,
         onAboutSelected: _showAboutDialog,
       ),
       body: CallbackShortcuts(

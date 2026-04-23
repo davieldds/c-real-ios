@@ -10,7 +10,8 @@
 .buildlog/
 .history
 
-
+# Build output
+**/dist/
 
 # Flutter repo-specific
 src/bin/cache/
