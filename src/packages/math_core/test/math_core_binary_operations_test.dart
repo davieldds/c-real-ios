@@ -282,12 +282,21 @@ void main() {
       });
 
       test("evaluates common logarithm", () {
-        final root = log(lit("100.0"), lit("10.0"));
+        final root = log(lit("10.0"), lit("100.0"));
         final tree = treeWith(root);
 
         MathCore.evaluate(tree, 4);
 
         expectValueOneOf(root, ["2", "2.0000"]);
+      });
+
+      test("evaluates log100(10) as exactly 0.5", () {
+        final root = log(lit("100.0"), lit("10.0"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 4);
+
+        expectValueOneOf(root, ["1/2", "0.5000"]);
       });
 
       test("ln of a negative number reports error", () {
@@ -300,7 +309,7 @@ void main() {
       });
 
       test("log of a negative number reports error", () {
-        final root = log(sub(lit("0.0"), lit("1.0")), lit("10.0"));
+        final root = log(lit("10.0"), sub(lit("0.0"), lit("1.0")));
         final tree = treeWith(root);
 
         MathCore.evaluate(tree, 4);
@@ -318,7 +327,7 @@ void main() {
       });
 
       test("log with base 1 reports error", () {
-        final root = log(lit("10.0"), lit("1.0"));
+        final root = log(lit("1.0"), lit("10.0"));
         final tree = treeWith(root);
 
         MathCore.evaluate(tree, 4);
@@ -327,7 +336,7 @@ void main() {
       });
 
       test("log with non-positive base reports error", () {
-        final root = log(lit("10.0"), sub(lit("0.0"), lit("2.0")));
+        final root = log(sub(lit("0.0"), lit("2.0")), lit("10.0"));
         final tree = treeWith(root);
 
         MathCore.evaluate(tree, 4);

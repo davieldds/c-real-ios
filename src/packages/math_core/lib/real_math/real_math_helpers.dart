@@ -81,6 +81,30 @@ int _min3(int a, int b, int c) {
   return m < c ? m : c;
 }
 
+/// Returns true if [mantissa] * 2^[scale] is exactly representable
+/// with [precision] decimal places.
+bool _isExactAtDecimalPrecision(BigInt mantissa, int scale, int precision) {
+  if (mantissa == BigInt.zero) return true;
+  if (precision < 0) return true;
+  if (scale >= 0) return true;
+
+  final binaryDenominatorExponent = -scale;
+  if (binaryDenominatorExponent <= precision) {
+    // 10^precision contributes enough factors of 2 to clear the denominator.
+    return true;
+  }
+
+  final requiredTwosFromMantissa = binaryDenominatorExponent - precision;
+  int twosInMantissa = 0;
+  BigInt absMantissa = mantissa.abs();
+  while (absMantissa != BigInt.zero && absMantissa.isEven) {
+    absMantissa >>= 1;
+    twosInMantissa++;
+  }
+
+  return twosInMantissa >= requiredTwosFromMantissa;
+}
+
 /// Applies a half‑ULP decimal bias to favor truncation in decimal output.
 ///
 /// The literal tests expect decimal truncation rather than bankers’ rounding.
@@ -91,6 +115,7 @@ BigInt _applyOutputBias(BigInt mantissa, int scale, int precision) {
   if (mantissa == BigInt.zero) return mantissa;
   if (precision <= 0) return mantissa;
   if (scale >= 0) return mantissa;
+  if (_isExactAtDecimalPrecision(mantissa, scale, precision)) return mantissa;
   final unit = BigInt.one << (-scale);
   if (mantissa.remainder(unit) == BigInt.zero) return mantissa;
 

@@ -107,11 +107,7 @@ void _evaluateLnExpression(LnExpression expression, int precision) {
   try {
     final lnMantissa = _lnMantissa(value, workScale);
 
-    final mantissa = _roundScaleMantissa(
-      lnMantissa,
-      workScale,
-      targetScale,
-    );
+    final mantissa = _roundScaleMantissa(lnMantissa, workScale, targetScale);
 
     expression.value = RealResult(
       mantissa: _applyOutputBias(mantissa, targetScale, precision),
@@ -127,8 +123,8 @@ void _evaluateLnExpression(LnExpression expression, int precision) {
 ///
 /// log_base(value) = ln(value) / ln(base)
 void _evaluateLogExpression(LogExpression expression, int precision) {
-  final value = expression.leftArg!.value as RealResult;
-  final base = expression.rightArg!.value as RealResult;
+  final value = expression.rightArg!.value as RealResult;
+  final base = expression.leftArg!.value as RealResult;
 
   if (value.mantissa <= BigInt.zero) {
     expression.value = ErrorResult("Logarithm of non-positive value");
@@ -153,11 +149,7 @@ void _evaluateLogExpression(LogExpression expression, int precision) {
 
     final quotient = _divSameScale(lnValue, lnBase, workScale);
 
-    final mantissa = _roundScaleMantissa(
-      quotient,
-      workScale,
-      targetScale,
-    );
+    final mantissa = _roundScaleMantissa(quotient, workScale, targetScale);
 
     expression.value = RealResult(
       mantissa: _applyOutputBias(mantissa, targetScale, precision),
