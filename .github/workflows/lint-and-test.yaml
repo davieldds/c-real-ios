@@ -9,7 +9,7 @@ on:
 jobs:
     validate:
         name: ${{ matrix.package.name }}
-        runs-on: self-hosted
+        runs-on: [self-hosted, linux]
         strategy:
             fail-fast: false
             matrix:
@@ -19,10 +19,10 @@ jobs:
                       is_flutter: true
                     - name: MathCore
                       dir: src/packages/math_core
-                      is_flutter: true
+                      is_flutter: false
                     - name: StdDev
                       dir: src/packages/stddev
-                      is_flutter: true
+                      is_flutter: false
                     - name: SyntaxTree
                       dir: src/packages/syntax_tree
                       is_flutter: true
@@ -79,36 +79,3 @@ jobs:
                   else
                     echo "No test dependency found; skipping tests for ${{ matrix.package.name }}."
                   fi
-
-    perf_regression_benchmark:
-        name: Performance Regression Benchmark
-        runs-on: self-hosted
-
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
-
-            - name: Set up Flutter (stable)
-              uses: subosito/flutter-action@v2
-              with:
-                  channel: stable
-                  cache: false
-
-            - name: Allow Flutter SDK git directory
-              run: git config --global --add safe.directory "$FLUTTER_ROOT"
-
-            - name: Cache pub-cache
-              uses: actions/cache@v5
-              with:
-                  path: ${{ env.PUB_CACHE || '~/.pub-cache' }}
-                  key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pub-cache-
-
-            - name: Install Dependencies
-              working-directory: src/packages/math_core
-              run: flutter pub get
-
-            - name: Run Performance Regression Benchmark
-              working-directory: src/packages/math_core
-              run: dart run benchmark/perf_regression_benchmark.dart

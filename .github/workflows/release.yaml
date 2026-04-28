@@ -1,0 +1,96 @@
+name: Build Release
+
+on:
+    push:
+        tags:
+            - "v*"
+
+jobs:
+    build-linux:
+        name: Build Linux release
+        runs-on: [self-hosted, linux]
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v6
+
+            - name: Install Linux Build Dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+            - name: Set up Flutter (stable)
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: stable
+                  cache: false
+
+            - name: Allow Flutter SDK git directory
+              run: git config --global --add safe.directory "$FLUTTER_ROOT"
+
+            - name: Activate Fastforge
+              working-directory: src
+              run: dart pub global activate fastforge
+
+            - name: Run Fastforge Build
+              shell: bash
+              working-directory: src
+              run: fastforge package --platform linux --targets deb
+
+            - name: Rename Linux Artifact
+              run: |
+                  mkdir -p final-assets
+                  mv src/dist/**/*.deb "final-assets/C-Real-${{ github.ref_name }}-linux-x64.deb"
+
+            - name: Upload Build Artifacts
+              uses: actions/upload-artifact@v7
+              with:
+                  name: build-artifacts-linux
+                  path: final-assets/*.deb
+
+    build-windows:
+        name: Build Windows release
+        runs-on: [self-hosted, windows]
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v6
+
+            # Note: Ensure Fastforge/Flutter is available on your Windows self-hosted runner
+            - name: Run Fastforge Build
+              working-directory: src
+              run: |
+                  fastforge package --platform windows --targets exe,msix
+
+            # RENAME STEP (PowerShell)
+            - name: Rename Windows Artifacts
+              run: |
+                  New-Item -ItemType Directory -Force -Path final-assets
+                  Move-Item -Path "src/dist/**/*.exe" -Destination "final-assets/C-Real-${{ github.ref_name }}-windows-x64-installer.exe"
+                  Move-Item -Path "src/dist/**/*.msix" -Destination "final-assets/C-Real-${{ github.ref_name }}-windows-x64.msix"
+
+            - name: Upload Build Artifacts
+              uses: actions/upload-artifact@v7
+              with:
+                  name: build-artifacts-windows
+                  path: final-assets/*
+
+    release:
+        name: Create GitHub Release
+        needs: [build-linux, build-windows]
+        runs-on: [self-hosted, linux]
+        permissions:
+            contents: write
+        steps:
+            - name: Download all artifacts
+              uses: actions/download-artifact@v8
+              with:
+                  path: release-assets
+                  merge-multiple: true
+
+            - name: Create Release
+              uses: ncipollo/release-action@v1
+              with:
+                  tag: ${{ github.ref_name }}
+                  name: C-Real ${{ github.ref_name }}
+                  artifacts: "release-assets/*"
+                  generateReleaseNotes: true
+                  token: ${{ secrets.GITHUB_TOKEN }}
