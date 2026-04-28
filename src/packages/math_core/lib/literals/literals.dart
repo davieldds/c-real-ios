@@ -115,27 +115,8 @@ class Literals {
     // Fetch (or initialize) the shared cache for pi.
     final cache = getPiCache(scale);
 
-    // Ensure both atan series are extended far enough for this scale.
-    cache.atan5.ensurePrecision(scale);
-    cache.atan239.ensurePrecision(scale);
-
-    // Combine exact rational sums using Machin's formula:
-    // pi = 16*atan(1/5) - 4*atan(1/239).
-    final atan5 = cache.atan5.sumRational;
-    final atan239 = cache.atan239.sumRational;
-    final term1 = atan5.multiplyInt(BigInt.from(16));
-    final term2 = atan239.multiplyInt(BigInt.from(4));
-    final piRational = RationalSum.subtract(term1, term2);
-
-    // Round to the requested scale and apply the half-ULP bias.
-    final mantissa = roundRationalToScale(piRational, scale) - halfUlpMantissa;
-
-    // Store the constructive real result.
-    literal.value = RealResult(
-      mantissa: mantissa,
-      scale: scale,
-      precision: normalizedPrecision,
-    );
+    // Reuse a cached approximation when it is already precise enough.
+    literal.value = cache.evaluate(scale, normalizedPrecision, halfUlpMantissa);
   }
 
   /// Evaluates the value of e to the specified [precision] and stores it in the [literal]'s value.
