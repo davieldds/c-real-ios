@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'licenses/app_licenses.dart';
 import 'pages/calculator/calculator_page.dart';
 
 /// Starts the calculator application.
 void main() {
+  registerAppLicenses();
   runApp(const MainApp());
 }
 

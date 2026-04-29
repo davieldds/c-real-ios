@@ -77,6 +77,7 @@ flutter:
     - assets/logocat/
     - assets/title/
     - assets/icons/
+    - assets/licenses/
   fonts:
     - family: Nunito
       fonts:
