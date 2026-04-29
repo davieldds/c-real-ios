@@ -167,8 +167,13 @@ class ErrorResult extends EvaluationResult {
   String get value => 'Error: $message';
 }
 
-/// Variant of [EvaluationResult] used when a child node of the given [Expression] results in an error
+/// Variant of [EvaluationResult] used when a child node of the given [Expression] results in an error. The [cause] field contains the
+/// [ErrorResult] that has caused the indeterminate result. The [value] getter returns the value of the cause, which is the error message.
 class IndeterminateResult extends EvaluationResult {
+  final ErrorResult cause;
+
+  IndeterminateResult(this.cause);
+
   @override
-  String get value => '?';
+  String get value => cause.value;
 }

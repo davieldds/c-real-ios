@@ -119,8 +119,13 @@ class MathCore {
     ErrorBudgeting.evaluateMagnitude(child, depth + 1);
 
     // If evaluation of the child subtree errored, this node is indeterminate
-    if (child.value is ErrorResult || child.value is IndeterminateResult) {
-      unary.value = IndeterminateResult();
+    if (child.value is ErrorResult) {
+      unary.value = IndeterminateResult(child.value as ErrorResult);
+      return;
+    } else if (child.value is IndeterminateResult) {
+      unary.value = IndeterminateResult(
+        (child.value as IndeterminateResult).cause,
+      );
       return;
     }
 
@@ -154,9 +159,11 @@ class MathCore {
         RealMath.EvaluateUnaryExpression(unary, precision);
         return;
 
-      // This codepath should never be reached as we already check for errors and indeterminate results above, but we return indeterminate just to be safe
+      // This codepath should never be reached as we already check for errors and indeterminate results above
       default:
-        unary.value = IndeterminateResult();
+        unary.value = ErrorResult(
+          "Unexpected result type for unary argument: ${child.value.runtimeType}",
+        );
     }
   }
 
@@ -175,11 +182,21 @@ class MathCore {
     ErrorBudgeting.evaluateMagnitude(right, depth + 1);
 
     // If evaluation of any of the subtrees errored, this node is indeterminate
-    if (left.value is ErrorResult ||
-        left.value is IndeterminateResult ||
-        right.value is ErrorResult ||
-        right.value is IndeterminateResult) {
-      binary.value = IndeterminateResult();
+    if (left.value is ErrorResult) {
+      binary.value = IndeterminateResult(left.value as ErrorResult);
+      return;
+    } else if (left.value is IndeterminateResult) {
+      binary.value = IndeterminateResult(
+        (left.value as IndeterminateResult).cause,
+      );
+      return;
+    } else if (right.value is ErrorResult) {
+      binary.value = IndeterminateResult(right.value as ErrorResult);
+      return;
+    } else if (right.value is IndeterminateResult) {
+      binary.value = IndeterminateResult(
+        (right.value as IndeterminateResult).cause,
+      );
       return;
     }
 

@@ -107,10 +107,12 @@ void main() {
       expect(result.value, equals("Error: division by zero"));
     });
 
-    test("IndeterminateResult uses question mark", () {
-      final result = IndeterminateResult();
+    test("IndeterminateResult bubbles error message", () {
+      final error = ErrorResult("division by zero");
 
-      expect(result.value, equals("?"));
+      final result = IndeterminateResult(error);
+
+      expect(result.value, equals(error.value));
     });
 
     test("RationalResult is also a RealResult", () {
