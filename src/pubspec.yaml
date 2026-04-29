@@ -42,11 +42,14 @@ dependencies:
   math_keyboard:
     git:
       url: https://github.com/lpollak06/math_keyboard.git
-      ref: 0b1b338b31125569828dc42560c4883077c68f70
+      ref: 9ed30ca8672ab602ccfc38cd8bbaf7e1ce0f7030
       path: math_keyboard
-    # path: ../../math_keyboard/math_keyboard
+    # path: ./math_keyboard/math_keyboard
   math_expressions: ^2.7.0
   shared_preferences: ^2.5.5
+  flutter_svg: ^2.2.4
+  flutter_welcome_kit: ^2.0.0
+  flutter_math_fork: ^0.7.4
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +76,18 @@ flutter:
     - assets/logo/
     - assets/logocat/
     - assets/title/
+    - assets/icons/
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-VariableFont_wght.ttf
+        - asset: assets/fonts/Nunito-Italic-VariableFont_wght.ttf
+          style: italic
+    - family: CascadiaMono
+      fonts:
+        - asset: assets/fonts/CascadiaMono-VariableFont_wght.ttf
+        - asset: assets/fonts/CascadiaMono-Italic-VariableFont_wght.ttf
+          style: italic
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
