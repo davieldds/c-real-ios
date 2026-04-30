@@ -52,6 +52,7 @@ ifeq ($(PLATFORM),windows)
 	dart compile exe packages/stddev/bin/stddev.dart
 else ifeq ($(PLATFORM),linux)
 	dart compile exe packages/stddev/bin/stddev.dart -o ./packages/stddev/bin/stddev
+	chmod +x ./packages/stddev/bin/stddev
 else
 	@echo "Invalid PLATFORM: $(PLATFORM)"
 	@echo "Use: make stddev PLATFORM=windows"
@@ -99,6 +100,7 @@ ifeq ($(PLATFORM),windows)
 	cmd /C "move /Y .\packages\stddev\bin\stddev.exe .\build\windows\x64\runner\Release"
 	cmd /C "move /Y .\windows\packaging\exe\remove_app.reg .\build\windows\x64\runner\Release"
 else ifeq ($(PLATFORM),linux)
+	cp ./packages/stddev/bin/stddev ./linux/packaging/deb/stddev
 	flutter build linux --release
 	mv ./packages/stddev/bin/stddev ./build/linux/x64/release/bundle
 else

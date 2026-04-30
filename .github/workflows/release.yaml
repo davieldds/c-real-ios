@@ -31,6 +31,12 @@ jobs:
               working-directory: src
               run: dart pub global activate fastforge
 
+            - name: Compile stddev
+              working-directory: src
+              run: |
+                  make stddev PLATFORM=linux
+                  cp ./packages/stddev/bin/stddev ./linux/packaging/deb/stddev
+
             - name: Run Fastforge Build
               shell: bash
               working-directory: src
@@ -53,6 +59,11 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
+
+            - name: Compile stddev
+              working-directory: src
+              run: |
+                  make stddev PLATFORM=windows
 
             # Note: Ensure Fastforge/Flutter is available on your Windows self-hosted runner
             - name: Run Fastforge Build

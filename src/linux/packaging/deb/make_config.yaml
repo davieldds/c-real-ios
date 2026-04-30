@@ -1,13 +1,13 @@
 display_name: C-Real
 package_name: c-real
 maintainer:
-  name: Lukas Pollak
-  email: xpollal00@vutbr.cz
+    name: Lukas Pollak
+    email: xpollal00@vutbr.cz
 co_authors:
-  - name: Jan Kostka
-    email: xkostkj00@vutbr.cz
-  - name: David Alois Bureš
-    email: xburesd00@vutbr.cz
+    - name: Jan Kostka
+      email: xkostkj00@vutbr.cz
+    - name: David Alois Bureš
+      email: xburesd00@vutbr.cz
 priority: optional
 section: x11
 installed_size: 37007
@@ -15,50 +15,45 @@ essential: false
 icon: assets/logo/logo2k.png
 
 postinstall_scripts:
-    - #!/usr/bin/env bash
-
-    - set -euo pipefail
-
-    - TARGET_DIR="$HOME/creal"
-    - LINE='export PATH="$HOME/creal:$PATH"'
-
-    - SHELL_NAME="$(basename "${SHELL:-}")"
-
-    - if [ "$SHELL_NAME" = "bash" ]; then
-    -   RC_FILE="$HOME/.bashrc"
-    - elif [ "$SHELL_NAME" = "zsh" ]; then
-    -   RC_FILE="$HOME/.zshrc"
-    - else
-    -   RC_FILE="$HOME/.profile"
-    - fi
-
-    - touch "$RC_FILE"
-
-    - if grep -Fxq "$LINE" "$RC_FILE"; then
-    -   echo "PATH entry already exists in $RC_FILE"
-    - else
-    -   echo "" >>"$RC_FILE"
-    -   echo "# Add creal to PATH" >>"$RC_FILE"
-    -   echo "$LINE" >>"$RC_FILE"
-    -   echo "Added ~/creal to PATH in $RC_FILE"
-    - fi
-
-    - echo "Run this to apply it now:"
-    - echo "source \"$RC_FILE\""
+  - |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    TARGET_DIR="$HOME/creal"
+    LINE='export PATH="$HOME/creal:$PATH"'
+    SHELL_NAME="$(basename "${SHELL:-}")"
+    if [ "$SHELL_NAME" = "bash" ]; then
+      RC_FILE="$HOME/.bashrc"
+    elif [ "$SHELL_NAME" = "zsh" ]; then
+      RC_FILE="$HOME/.zshrc"
+    else
+      RC_FILE="$HOME/.profile"
+    fi
+    touch "$RC_FILE"
+    if grep -Fxq "$LINE" "$RC_FILE"; then
+      echo "PATH entry already exists in $RC_FILE"
+    else
+      echo "" >>"$RC_FILE"
+      echo "# Add creal to PATH" >>"$RC_FILE"
+      echo "$LINE" >>"$RC_FILE"
+      echo "Added ~/creal to PATH in $RC_FILE"
+    fi
+    echo "Run this to apply it now:"
+    echo "source \"$RC_FILE\""
 postuninstall_scripts:
-  - echo "Good bye D:"
+    - echo "Good bye D:"
 
 keywords:
-  - Calculator
-  - C-Real
-  - Application
+    - Calculator
+    - C-Real
+    - Application
 
 generic_name: Calculator Application
 
 categories:
-  - utils
+    - utils
 
 startup_notify: true
+
 # You can also specify [metainfo](https://freedesktop.org/software/appstream/docs/chap-Quickstart.html) file
 # which contains metadata of the app.
 # metainfo: linux/packaging/myappid.appdata.xml
