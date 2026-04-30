@@ -24,6 +24,7 @@ Ujistěte se, že máte nainstalováno:
 - [Dart](https://dart.dev/get-dart) (obvykle je součástí Flutteru)
 - Pro balení pro Linux: build nástroje pro Debian/Ubuntu
 - Pro buildy pro Windows: povolenou podporu desktopu ve Flutteru
+- [Inno Setup 6 (pro Windows installer)](https://jrsoftware.org/isdl.php/Inno-Setup-Downloads)
 
 Zkontrolujte své nastavení:
 
