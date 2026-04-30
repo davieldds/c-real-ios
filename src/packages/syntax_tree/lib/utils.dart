@@ -14,6 +14,7 @@ String syntaxTreeToString(SyntaxTree tree) {
 
 void printSyntaxTree(SyntaxTree tree) {
   for (final line in syntaxTreeToString(tree).split('\n')) {
+    // ignore: avoid_print
     print(line);
   }
 }

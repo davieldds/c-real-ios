@@ -1,4 +1,4 @@
-.PHONY: all pack clean test doc run stddev help install release FORCE
+.PHONY: all pack clean test doc serve-doc run stddev help install release FORCE
 
 PLATFORM ?= windows
 
@@ -12,7 +12,8 @@ help:
 	@echo "  make pack     - create submission archive"
 	@echo "  make clean    - remove generated files"
 	@echo "  make test     - run math library tests"
-	@echo "  make doc      - generate documentation"
+	@echo "  make doc        - generate documentation"
+	@echo "  make serve-doc  - serve built docs from doc/ with Bun (after make doc)"
 	@echo "  make run      - run application"
 	@echo "  make stddev   - build stddev profiling executable"
 	@echo "  make install  - install dependencies"
@@ -22,9 +23,6 @@ help:
 
 install:
 	flutter pub get
-	flutter pub get -C packages/math_core
-	flutter pub get -C packages/stddev
-	flutter pub get -C packages/syntax_tree
 
 test: install FORCE
 	flutter analyze
@@ -40,8 +38,14 @@ test: install FORCE
 	cd packages/syntax_tree && flutter test
 
 doc: FORCE
-	flutter pub get
-	flutter doc .
+	dartdoc_modern --format vitepress --workspace-docs --output doc/modern
+	rm -rf doc/modern/guide/c_real
+	cd doc/modern && git checkout -- .vitepress/generated/guide-sidebar.ts
+	cd doc/modern && bun install && bun run build
+	cp -r doc/modern/.vitepress/dist/. doc/
+
+serve-doc: FORCE
+	cd doc && bun run ./serve.ts
 
 run:
 	flutter run lib/main.dart

@@ -1,0 +1,109 @@
+/* Member signature blocks with clickable type links */
+
+.member-signature {
+  margin: 5px 0 10px;
+}
+.member-signature .member-signature-code {
+  background: var(--vp-code-block-bg);
+  border-radius: 8px;
+  padding: 5px 14px;
+  overflow-x: auto;
+  white-space: normal;
+  overflow-wrap: break-word;
+  margin: 0;
+  font-family: var(--vp-font-family-mono);
+  font-size: var(--vp-code-font-size);
+  color: #24292E;
+  line-height: 1.08;
+}
+.member-signature .member-signature-line {
+  display: block;
+  font-size: 0;
+}
+.member-signature .member-signature-token,
+.member-signature .member-signature-space {
+  font-family: inherit;
+  font-size: var(--vp-code-font-size);
+  line-height: 1.08;
+}
+.member-signature .member-signature-space {
+  white-space: pre;
+}
+.dark .member-signature .member-signature-code {
+  color: #E1E4E8;
+}
+/* Shiki-matched syntax highlighting for member signatures.
+   Colors from --shiki-light / --shiki-dark CSS variables. */
+
+/* Keywords: const, factory, final, get, set, required, typedef, true, false, null */
+.member-signature .kw {
+  color: #D73A49;
+}
+/* Unlinked types: String, int, void, dynamic, type parameters */
+.member-signature .type {
+  color: #005CC5;
+}
+/* Linked types (clickable) — same color as .type, underline on hover */
+.member-signature .type-link {
+  color: #005CC5;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+}
+.member-signature .type-link:hover {
+  text-decoration-thickness: 2px;
+}
+/* Function/method/constructor/field/property names */
+.member-signature .fn {
+  color: #6F42C1;
+}
+/* String literals in default values */
+.member-signature .str-lit {
+  color: #032F62;
+}
+/* Numeric literals in default values */
+.member-signature .num-lit {
+  color: #005CC5;
+}
+/* Dark mode overrides */
+.dark .member-signature .kw {
+  color: #F97583;
+}
+.dark .member-signature .type {
+  color: #79B8FF;
+}
+.dark .member-signature .type-link {
+  color: #79B8FF;
+  text-decoration-color: currentColor;
+}
+.dark .member-signature .type-link:hover {
+  text-decoration-thickness: 2px;
+}
+.dark .member-signature .fn {
+  color: #B392F0;
+}
+.dark .member-signature .str-lit {
+  color: #9ECBFF;
+}
+.dark .member-signature .num-lit {
+  color: #79B8FF;
+}
+
+/* API auto-linker — inline code that links to API docs */
+
+a.api-link {
+  text-decoration: none;
+}
+
+a.api-link code {
+  color: var(--vp-c-brand-1);
+  border-bottom: 2px solid color-mix(in srgb, var(--vp-c-brand-1) 50%, transparent);
+  padding-bottom: 1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+a.api-link:hover code {
+  color: var(--vp-c-brand-2);
+  border-bottom-color: var(--vp-c-brand-1);
+}

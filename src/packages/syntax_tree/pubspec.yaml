@@ -1,6 +1,7 @@
 name: syntax_tree
 description: "A package for representing and manipulating syntax trees in Dart."
 version: 1.0.0
+resolution: workspace
 homepage:
 
 environment:

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:ivs_projekt_2/main.dart';
+import 'package:c_real/main.dart';
 
 void main() {
   setUp(() {

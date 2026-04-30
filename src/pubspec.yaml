@@ -1,5 +1,5 @@
-name: ivs_projekt_2
-description: "IVS Projekt 2"
+name: c_real
+description: "C-Real"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
@@ -20,6 +20,11 @@ version: 1.0.0+1
 
 environment:
   sdk: ^3.11.1
+
+workspace:
+  - packages/math_core
+  - packages/syntax_tree
+  - packages/stddev
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

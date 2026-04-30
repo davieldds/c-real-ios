@@ -20,19 +20,6 @@ dartdoc:
     - src.internal_*.dart
     - experimental
 
-  # Structured topical pages for generated documentation.
-  categories:
-    core-algorithms:
-      displayName: Core Algorithms
-      markdown: doc/core_algorithms.md
-    ui-components:
-      displayName: UI Components
-      markdown: doc/ui_components.md
-
-  categoryOrder:
-    - core-algorithms
-    - ui-components
-
   # Approximation of IMAGE_PATH / project presentation options.
   favicon: web/favicon.png
 
