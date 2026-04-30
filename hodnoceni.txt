@@ -1,0 +1,3 @@
+xkostkj00 100 (Matematická knihovna, stddev, CI/CD, návrh UI a ikonky, komunikace s Microsoft Store)
+xburesd00 100 (Grafické rozhraní, licence, dokumentace, název a grafická podoba názvu, pomoc s forkem externí knihovny)
+xpollal00 100 (Abstract syntax tree - datové struktury a parsing výrazu, údržba forku externí knihovny, instalátory)
