@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=C-Real
+Comment=Launch C-Real application
+Exec=~/creal/creal
+Icon=~/creal/data/flutter_assets/assets/logo/logo2k.png
+Terminal=false
+Categories=Utility;

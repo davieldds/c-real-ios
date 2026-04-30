@@ -47,10 +47,34 @@ ArchitecturesInstallIn64BitMode=x64
 {% if locale == 'uk' %}Name: "ukrainian"; MessagesFile: "compiler:Languages\\Ukrainian.isl"{% endif %}
 {% endfor %}
 
+[Setup]
+ChangesEnvironment=yes
+
+[Registry]
+Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; \
+    ValueData: "{olddata};{app}"; Check: NeedsAddPath(ExpandConstant('{app}'))
+
+[Code]
+function NeedsAddPath(Dir: string): Boolean;
+var
+  Path: string;
+begin
+  if not RegQueryStringValue(HKEY_CURRENT_USER, 'Environment', 'Path', Path)
+  then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  Result :=
+    Pos(';' + UpperCase(Dir) + ';', ';' + UpperCase(Path) + ';') = 0;
+end;
+
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: {% if CREATE_DESKTOP_ICON != true %}unchecked{% else %}checkedonce{% endif %}
 Name: "launchAtStartup"; Description: "{cm:AutoStartProgram,{{DISPLAY_NAME}}}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: {% if LAUNCH_AT_STARTUP != true %}unchecked{% else %}checkedonce{% endif %}
 [Files]
+Source: "..\..\packages\stddev\bin\stddev.exe"; DestDir: "{app}"
 Source: "..\..\windows\packaging\requsites\vcredist_x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files

@@ -1,4 +1,4 @@
-.PHONY: all pack clean test doc serve-doc run stddev help install release FORCE
+.PHONY: all pack clean test doc serve-doc run stddev help install release build FORCE
 
 PLATFORM ?= windows
 
@@ -27,13 +27,10 @@ install:
 test: install FORCE
 	flutter analyze
 	flutter test
-
 	cd packages/math_core && flutter analyze
 	cd packages/math_core && flutter test
-
 	cd packages/stddev && flutter analyze
 	cd packages/stddev && flutter test
-
 	cd packages/syntax_tree && flutter analyze
 	cd packages/syntax_tree && flutter test
 
@@ -51,8 +48,16 @@ run:
 	flutter run lib/main.dart
 
 stddev:
-	mkdir -p build/stddev
-	flutter compile exe packages/stddev/bin/stddev.dart -o build/stddev/stddev
+ifeq ($(PLATFORM),windows)
+	dart compile exe packages/stddev/bin/stddev.dart
+else ifeq ($(PLATFORM),linux)
+	dart compile exe packages/stddev/bin/stddev.dart -o ./packages/stddev/bin/stddev
+else
+	@echo "Invalid PLATFORM: $(PLATFORM)"
+	@echo "Use: make stddev PLATFORM=windows"
+	@echo "Use: make stddev PLATFORM=linux"
+	@exit 1
+endif
 
 pack: clean
 	mkdir -p dist
@@ -76,15 +81,31 @@ guard-%:
 		exit 1; \
 	fi
 
-release: guard-PLATFORM
-	@if [ "$(PLATFORM)" = "windows" ]; then \
-		fastforge package --platform windows --targets exe,msix; \
-	elif [ "$(PLATFORM)" = "linux" ]; then \
-		fastforge package --platform linux --targets deb; \
-	else \
-		echo "make release PLATFORM=windows"; \
-		echo "make release PLATFORM=linux"; \
-		exit 1; \
-	fi
+release:
+ifeq ($(PLATFORM),windows)
+	fastforge package --platform windows --targets exe,msix
+else ifeq ($(PLATFORM),linux)
+	fastforge package --platform linux --targets deb
+else
+	@echo "Invalid PLATFORM: $(PLATFORM)"
+	@echo "Use: make release PLATFORM=windows"
+	@echo "Use: make release PLATFORM=linux"
+	@exit 1
+endif
+
+build: install stddev
+ifeq ($(PLATFORM),windows)
+	flutter build windows --release
+	cmd /C "move /Y .\packages\stddev\bin\stddev.exe .\build\windows\x64\runner\Release"
+	cmd /C "move /Y .\windows\packaging\exe\remove_app.reg .\build\windows\x64\runner\Release"
+else ifeq ($(PLATFORM),linux)
+	flutter build linux --release
+	mv ./packages/stddev/bin/stddev ./build/linux/x64/release/bundle
+else
+	@echo "Invalid PLATFORM: $(PLATFORM)"
+	@echo "Use: make build PLATFORM=windows"
+	@echo "Use: make build PLATFORM=linux"
+	@exit 1
+endif
 
 FORCE:
