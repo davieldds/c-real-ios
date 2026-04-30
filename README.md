@@ -60,7 +60,6 @@ make all && make run
 Prostredi
 ---------
 
-Ubuntu 64bit
 Windows 64bit
 
 Autori
