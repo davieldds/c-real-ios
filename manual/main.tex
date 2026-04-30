@@ -64,7 +64,7 @@
 
 \subsubsection{Postup instalace:}
 \begin{enumerate}
-    \item Stáhněte soubor \textbf{C-Real-Setup-Windows.exe}.
+    \item Stáhněte soubor \textbf{C-Real-xxx-windows-x64-installer.exe}.
     \item Spusťte instalační soubor dvojklikem.
     \item Pokude se objeví bezpečnostní upozornení systému Windows, potvrďte spuštení.
     \item V instalačním průvodci klikněte na \textbf{Next}
@@ -120,7 +120,7 @@ Program pro Ubuntu je distribuován jako \textbf{.deb} balíček.
 \subsubsection{Postup instalace}
 
 \begin{enumerate}
-    \item Stáhňete soubor \textbf{C-Real-Setup-Ubuntu.deb},
+    \item Stáhňete soubor \textbf{C-Real-xxx-linux-x64.deb},
     \item Otevřete jej v systému Ubuntu Software nebo jiném správci balíčků.
     \item Klikněte na \textbf{Install}.
     \item Zadejte heslo správce.
@@ -169,8 +169,11 @@ Do konzole zadejte příkaz: \verb|sudo apt remove c-real|
     \begin{enumerate}
         \item Zapněte vývojářský režim v \textbf{Nastavení $\rightarrow$ Systém $\rightarrow$ Upřesnit}
         \item Zkompilujte program pomocí příkazu: \verb|make build PLATFORM=windows|
+        \begin{itemize}
+            \item V případě chyby s číslem 69, zadejte příkaz: \verb|curl.exe -I https://pub.dev| a opakujte krok 1.
+        \end{itemize}
         \item vytvořte složku v systémových souborech příkazem: \verb|mkdir C:\Program Files\creal\|
-        \item Do nově vytvořené složky přesuňte obsahu souboru:\\ \textbf{build/windows/x64/runner/Release/}
+        \item Do nově vytvořeného souboru přesuňte obsahu souboru:\\ \textbf{build/windows/x64/runner/Release/}
     \end{enumerate}
     
     \subsubsection{Pro Ubuntu}
