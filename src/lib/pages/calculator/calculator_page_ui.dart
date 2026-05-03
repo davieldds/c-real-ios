@@ -8,7 +8,7 @@ class _CalculatorPageState extends _CalculatorPageStateBase
     showAboutDialog(
       context: context,
       applicationName: widget.title,
-      applicationVersion: '1.0.0',
+      applicationVersion: '1.0.1',
       applicationIcon: Image.asset(
         CalculatorPageConstants.brandLogoAsset,
         width: 48,
