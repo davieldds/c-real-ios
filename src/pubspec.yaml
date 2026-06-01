@@ -52,7 +52,7 @@ dependencies:
     # path: ./math_keyboard/math_keyboard
   math_expressions: ^2.7.0
   shared_preferences: ^2.5.5
-  flutter_svg: ^2.2.4
+  flutter_svg: ^2.3.0
   flutter_welcome_kit: ^2.0.0
   flutter_math_fork: ^0.7.4
 
