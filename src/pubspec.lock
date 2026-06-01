@@ -225,10 +225,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_welcome_kit
-      sha256: a71558901734644cbdb172d1ddee6880812f0aed7d2fffed0c72f5b78b9d9284
+      sha256: dac098db5e0b038ab6ddb68ebba6dac233e2898461b1eec3ba09d8081a592d92
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   frontend_server_client:
     dependency: transitive
     description:
