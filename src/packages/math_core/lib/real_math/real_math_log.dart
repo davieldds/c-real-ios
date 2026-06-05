@@ -6,6 +6,15 @@ part of real_math;
 /// and to guarantee deterministic results across evaluations.
 final Map<int, BigInt> _ln2Cache = {};
 
+/// Divides two fixed-point mantissas and returns a mantissa at [scale],
+/// rounding to the nearest integer (half away from zero).
+BigInt _divSameScaleRounded(BigInt numerator, BigInt denominator, int scale) {
+  if (scale >= 0) {
+    return _nearestDiv(numerator, denominator << scale);
+  }
+  return _nearestDiv(numerator << (-scale), denominator);
+}
+
 /// Fixed-point mantissa for ln(2) at the given binary [scale].
 BigInt _ln2Mantissa(int scale) {
   final cached = _ln2Cache[scale];
@@ -13,7 +22,7 @@ BigInt _ln2Mantissa(int scale) {
 
   // ln(2) = 2 * (z + z^3/3 + z^5/5 + ...) with z = (2-1)/(2+1) = 1/3.
   final oneMant = scale < 0 ? (BigInt.one << (-scale)) : BigInt.one;
-  final zMant = _roundedDiv(oneMant, BigInt.from(3));
+  final zMant = _nearestDiv(oneMant, BigInt.from(3));
   final z2Mant = _mulSameScale(zMant, zMant, scale);
 
   BigInt sum = BigInt.zero;
@@ -22,7 +31,7 @@ BigInt _ln2Mantissa(int scale) {
 
   // Truncate once the term no longer affects this fixed-point scale.
   while (true) {
-    final termDiv = term ~/ BigInt.from(denom);
+    final termDiv = _nearestDiv(term, BigInt.from(denom));
     if (termDiv == BigInt.zero) break;
     sum += termDiv;
     term = _mulSameScale(term, z2Mant, scale);
@@ -60,7 +69,7 @@ BigInt _lnMantissa(RealResult value, int scale) {
   final yMinus = yMant - oneMant;
   final yPlus = yMant + oneMant;
 
-  final zMant = _divSameScale(yMinus, yPlus, scale);
+  final zMant = _divSameScaleRounded(yMinus, yPlus, scale);
   final z2Mant = _mulSameScale(zMant, zMant, scale);
 
   BigInt sum = BigInt.zero;
@@ -69,7 +78,7 @@ BigInt _lnMantissa(RealResult value, int scale) {
 
   // Truncate once the term no longer affects this fixed-point scale.
   while (true) {
-    final termDiv = term ~/ BigInt.from(denom);
+    final termDiv = _nearestDiv(term, BigInt.from(denom));
     if (termDiv == BigInt.zero) break;
     sum += termDiv;
     term = _mulSameScale(term, z2Mant, scale);
@@ -110,7 +119,7 @@ void _evaluateLnExpression(LnExpression expression, int precision) {
     final mantissa = _roundScaleMantissa(lnMantissa, workScale, targetScale);
 
     expression.value = RealResult(
-      mantissa: _applyOutputBias(mantissa, targetScale, precision),
+      mantissa: mantissa,
       scale: targetScale,
       precision: precision,
     );
@@ -152,7 +161,7 @@ void _evaluateLogExpression(LogExpression expression, int precision) {
     final mantissa = _roundScaleMantissa(quotient, workScale, targetScale);
 
     expression.value = RealResult(
-      mantissa: _applyOutputBias(mantissa, targetScale, precision),
+      mantissa: mantissa,
       scale: targetScale,
       precision: precision,
     );

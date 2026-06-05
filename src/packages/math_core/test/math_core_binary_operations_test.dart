@@ -281,6 +281,24 @@ void main() {
         expectValueOneOf(root, ["1", "1.0000"]);
       });
 
+      test("evaluates natural logarithm at higher precision", () {
+        final root = ln(lit("e"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 10);
+
+        expectValueOneOf(root, ["1", "1.0000000000"]);
+      });
+
+      test("evaluates log base e of e", () {
+        final root = log(lit("e"), lit("e"));
+        final tree = treeWith(root);
+
+        MathCore.evaluate(tree, 10);
+
+        expectValueOneOf(root, ["1", "1.0000000000"]);
+      });
+
       test("evaluates common logarithm", () {
         final root = log(lit("10.0"), lit("100.0"));
         final tree = treeWith(root);

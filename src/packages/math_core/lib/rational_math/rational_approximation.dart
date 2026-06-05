@@ -3,7 +3,9 @@ import 'package:syntax_tree/evaluation_result.dart';
 /// Approximates [rational] to the requested decimal [precision].
 void approximateRationalToPrecision(RationalResult rational, int precision) {
   if (precision < 0)
-    throw ArgumentError("Precision must be non-negative, got $precision");
+    precision = 0;
+    // throw ArgumentError("Precision must be non-negative, got $precision");
+
 
   // We need enough binary digits to round correctly to `precision` decimal
   // digits. Since log2(10) ≈ 3.3219, we use 4 bits per decimal digit plus
