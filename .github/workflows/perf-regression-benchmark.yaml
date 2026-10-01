@@ -3,17 +3,28 @@ name: Performance Regression Benchmark
 on:
     push:
         branches: ["main"]
-    pull_request:
+    pull_request_target:
         branches: ["main"]
+        types: [opened, synchronize, reopened, labeled]
+
+permissions:
+    contents: read
 
 jobs:
     perf_regression_benchmark:
         name: Performance Regression Benchmark
+        if: >
+            github.event_name == 'push' ||
+            github.event.pull_request.head.repo.full_name == github.repository ||
+            contains(github.event.pull_request.labels.*.name, 'ok-to-test')
         runs-on: [self-hosted, linux]
 
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event_name == 'push' && github.sha || github.event.pull_request.head.sha }}
+                  persist-credentials: false
 
             - name: Set up Flutter (stable)
               uses: subosito/flutter-action@v2

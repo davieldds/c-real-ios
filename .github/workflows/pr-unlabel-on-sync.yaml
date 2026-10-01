@@ -1,0 +1,25 @@
+name: Remove ok-to-test on sync
+
+on:
+    pull_request_target:
+        types: [synchronize]
+
+permissions:
+    pull-requests: write
+
+jobs:
+    unlabel:
+        name: Remove ok-to-test
+        if: contains(github.event.pull_request.labels.*.name, 'ok-to-test')
+        runs-on: [self-hosted, linux]
+        steps:
+            - name: Remove ok-to-test label
+              uses: actions/github-script@v8
+              with:
+                  script: |
+                      await github.rest.issues.removeLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.payload.pull_request.number,
+                        name: 'ok-to-test',
+                      });
