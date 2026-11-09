@@ -1,4 +1,4 @@
-.PHONY: all pack clean test doc serve-doc run stddev help install release build FORCE
+.PHONY: all pack clean test doc serve-doc run stddev help install release build ipa FORCE
 
 PLATFORM ?= windows
 
@@ -17,6 +17,7 @@ help:
 	@echo "  make run      - run application"
 	@echo "  make stddev   - build stddev profiling executable"
 	@echo "  make install  - install dependencies"
+	@echo "  make ipa      - build unsigned iOS IPA for LiveContainer"
 	@echo "  make release PLATFORM=[windows/linux]  - build installers"
 	@echo "  make test     - analyze and run tests"
 	@echo "  make help     - show this help"
@@ -109,5 +110,13 @@ else
 	@echo "Use: make build PLATFORM=linux"
 	@exit 1
 endif
+
+ipa: install FORCE
+	flutter build ios --release --no-codesign
+	mkdir -p dist/Payload
+	cp -R build/ios/iphoneos/Runner.app dist/Payload/
+	cd dist && zip -r -y C-Real.ipa Payload
+	rm -rf dist/Payload
+	@echo "Built dist/C-Real.ipa successfully for LiveContainer sideloading."
 
 FORCE:
