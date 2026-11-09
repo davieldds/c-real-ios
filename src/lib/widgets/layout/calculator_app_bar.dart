@@ -58,7 +58,7 @@ class CalculatorAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   static const double _toolbarHeight = kToolbarHeight + 12.0;
   static const double _contentInset = 8.0;
-  static const double _reservedHeight = kToolbarHeight;
+  static const double _reservedHeight = _toolbarHeight + 6.0;
 
   @override
   Widget build(BuildContext context) {

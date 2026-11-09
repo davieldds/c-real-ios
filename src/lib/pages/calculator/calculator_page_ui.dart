@@ -150,20 +150,23 @@ class _CalculatorPageState extends _CalculatorPageStateBase
 
                 final double expressionHeight = useSplitLayout
                     ? (constraints.maxHeight * 0.20).clamp(110.0, 160.0)
-                    : (constraints.maxHeight * 0.12).clamp(84.0, 104.0);
+                    : (hasResult
+                          ? (constraints.maxHeight * 0.13).clamp(92.0, 108.0)
+                          : (constraints.maxHeight * 0.22).clamp(136.0, 164.0));
 
                 final double resultHeight = useSplitLayout
                     ? (hasResult ? 100.0 : 0.0)
-                    : (hasResult ? 104.0 : 0.0);
+                    : (hasResult ? 114.0 : 0.0);
 
                 final double displayHeight = expressionHeight + resultHeight;
                 final double horizontalPadding = useSplitLayout ? 12.0 : 8.0;
-                final double verticalPadding = useSplitLayout ? 12.0 : 6.0;
 
                 return Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: horizontalPadding,
-                    vertical: verticalPadding,
+                  padding: EdgeInsets.only(
+                    left: horizontalPadding,
+                    right: horizontalPadding,
+                    top: useSplitLayout ? 12.0 : 14.0,
+                    bottom: useSplitLayout ? 12.0 : 8.0,
                   ),
                   child: [
                     AnimatedContainer(

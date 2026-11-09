@@ -88,7 +88,6 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
   double? _pendingResultOffset;
   double? _resultTargetOffset;
   double _resultHorizontalDragRemainder = 0;
-  double _resultVerticalDragRemainder = 0;
   Timer? _resultSnapDebounce;
   Timer? _spinnerTimer;
   bool _showSpinner = false;
@@ -403,7 +402,7 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
     _scrollResultTo(targetOffset, animated: animated);
   }
 
-  void _consumeSnappedDelta(BuildContext context, double delta, Axis axis) {
+  void _consumeSnappedDelta(BuildContext context, double delta) {
     if (!_resultScrollController.hasClients || delta == 0) {
       return;
     }
@@ -413,31 +412,17 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
       return;
     }
 
-    if (axis == Axis.horizontal) {
-      _resultHorizontalDragRemainder += delta;
-      while (_resultHorizontalDragRemainder.abs() >= step) {
-        final int direction = _resultHorizontalDragRemainder.isNegative
-            ? -1
-            : 1;
-        _scrollResultByStep(context, direction);
-        _resultHorizontalDragRemainder +=
-            _resultHorizontalDragRemainder.isNegative ? step : -step;
-      }
-    } else {
-      _resultVerticalDragRemainder += delta;
-      while (_resultVerticalDragRemainder.abs() >= step) {
-        final int direction = _resultVerticalDragRemainder.isNegative ? -1 : 1;
-        _scrollResultByStep(context, direction);
-        _resultVerticalDragRemainder += _resultVerticalDragRemainder.isNegative
-            ? step
-            : -step;
-      }
+    _resultHorizontalDragRemainder += delta;
+    while (_resultHorizontalDragRemainder.abs() >= step) {
+      final int direction = _resultHorizontalDragRemainder.isNegative ? -1 : 1;
+      _scrollResultByStep(context, direction);
+      _resultHorizontalDragRemainder +=
+          _resultHorizontalDragRemainder.isNegative ? step : -step;
     }
   }
 
   void _resetResultDragRemainders() {
     _resultHorizontalDragRemainder = 0;
-    _resultVerticalDragRemainder = 0;
   }
 
   void _scheduleResultSnap(BuildContext context) {
@@ -573,171 +558,160 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
         : scheme.surface;
     final String effectiveResult = _effectiveResult;
 
-    return Stack(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.center,
-          child: SizedBox(
-            height: 48,
-            child: GestureDetector(
+        SizedBox(
+          height: 42,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: (_) => _resetResultDragRemainders(),
+            onHorizontalDragUpdate: (details) {
+              _consumeSnappedDelta(context, details.delta.dx);
+            },
+            onHorizontalDragEnd: (_) {
+              _resetResultDragRemainders();
+              _scheduleResultSnap(context);
+            },
+            onHorizontalDragCancel: _resetResultDragRemainders,
+            child: Listener(
               behavior: HitTestBehavior.opaque,
-              onHorizontalDragStart: (_) => _resetResultDragRemainders(),
-              onVerticalDragStart: (_) => _resetResultDragRemainders(),
-              onHorizontalDragUpdate: (details) {
-                _consumeSnappedDelta(
-                  context,
-                  details.delta.dx,
-                  Axis.horizontal,
-                );
-              },
-              onVerticalDragUpdate: (details) {
-                _consumeSnappedDelta(context, details.delta.dy, Axis.vertical);
-              },
-              onHorizontalDragEnd: (_) {
-                _resetResultDragRemainders();
-                _scheduleResultSnap(context);
-              },
-              onVerticalDragEnd: (_) {
-                _resetResultDragRemainders();
-                _scheduleResultSnap(context);
-              },
-              onHorizontalDragCancel: _resetResultDragRemainders,
-              onVerticalDragCancel: _resetResultDragRemainders,
-              child: Listener(
-                behavior: HitTestBehavior.opaque,
-                onPointerSignal: (event) =>
-                    _handleResultPointerSignal(context, event),
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ScrollConfiguration(
-                        behavior: const MaterialScrollBehavior().copyWith(
-                          dragDevices: {
-                            PointerDeviceKind.mouse,
-                            PointerDeviceKind.touch,
-                            PointerDeviceKind.trackpad,
-                            PointerDeviceKind.stylus,
-                            PointerDeviceKind.invertedStylus,
-                          },
-                        ),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            const double horizontalPadding = 18;
-                            final double availableWidth = math.max(
-                              0,
-                              constraints.maxWidth - (horizontalPadding * 2),
-                            );
-                            final String displayResult = _buildPaddedResult(
-                              context,
-                              effectiveResult,
-                              availableWidth,
-                            );
+              onPointerSignal: (event) =>
+                  _handleResultPointerSignal(context, event),
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ScrollConfiguration(
+                      behavior: const MaterialScrollBehavior().copyWith(
+                        dragDevices: {
+                          PointerDeviceKind.mouse,
+                          PointerDeviceKind.touch,
+                          PointerDeviceKind.trackpad,
+                          PointerDeviceKind.stylus,
+                          PointerDeviceKind.invertedStylus,
+                        },
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          const double horizontalPadding = 18;
+                          final double availableWidth = math.max(
+                            0,
+                            constraints.maxWidth - (horizontalPadding * 2),
+                          );
+                          final String displayResult = _buildPaddedResult(
+                            context,
+                            effectiveResult,
+                            availableWidth,
+                          );
 
-                            return SingleChildScrollView(
-                              controller: _resultScrollController,
-                              scrollDirection: Axis.horizontal,
-                              reverse: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: horizontalPadding,
-                                  vertical: 6,
-                                ),
-                                child: AnimatedSwitcher(
-                                  duration: _resultAnimationDuration,
-                                  switchInCurve: _emphasizedCurve,
-                                  switchOutCurve: Curves.easeInCubic,
-                                  transitionBuilder: (child, animation) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: child,
-                                    );
-                                  },
-                                  child: _showSpinner
-                                      ? const Padding(
-                                          key: ValueKey<String>(
-                                            'result-spinner',
-                                          ),
-                                          padding: EdgeInsets.only(right: 8.0),
-                                          child: SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          ),
-                                        )
-                                      : Text(
-                                          displayResult,
-                                          key: const ValueKey<String>(
-                                            'result-text',
-                                          ),
-                                          maxLines: 1,
-                                          softWrap: false,
-                                          style: _resultTextStyle(context)
-                                              .copyWith(
-                                                color: _hasResult
-                                                    ? (_isErrorResult
-                                                          ? scheme.error
-                                                          : scheme.onSurface)
-                                                    : scheme.onSurfaceVariant
-                                                          .withValues(
-                                                            alpha: 0.72,
-                                                          ),
-                                              ),
-                                        ),
-                                ),
+                          return SingleChildScrollView(
+                            controller: _resultScrollController,
+                            scrollDirection: Axis.horizontal,
+                            reverse: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
                               ),
-                            );
-                          },
-                        ),
+                              child: AnimatedSwitcher(
+                                duration: _resultAnimationDuration,
+                                switchInCurve: _emphasizedCurve,
+                                switchOutCurve: Curves.easeInCubic,
+                                transitionBuilder: (child, animation) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                child: _showSpinner
+                                    ? const Padding(
+                                        key: ValueKey<String>('result-spinner'),
+                                        padding: EdgeInsets.only(right: 8.0),
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        displayResult,
+                                        key: const ValueKey<String>(
+                                          'result-text',
+                                        ),
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        style: _resultTextStyle(context)
+                                            .copyWith(
+                                              color: _hasResult
+                                                  ? (_isErrorResult
+                                                        ? scheme.error
+                                                        : scheme.onSurface)
+                                                  : scheme.onSurfaceVariant
+                                                        .withValues(
+                                                          alpha: 0.72,
+                                                        ),
+                                            ),
+                                      ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                    IgnorePointer(
-                      child: AnimatedOpacity(
-                        duration: _resultAnimationDuration,
-                        curve: _emphasizedCurve,
-                        opacity: _showLeftOverflowIndicator ? 1 : 0,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: 36,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  panelBackgroundColor,
-                                  panelBackgroundColor.withValues(alpha: 0.92),
-                                  panelBackgroundColor.withValues(alpha: 0.0),
-                                ],
-                                stops: const [0.0, 0.55, 1.0],
-                              ),
+                  ),
+                  IgnorePointer(
+                    child: AnimatedOpacity(
+                      duration: _resultAnimationDuration,
+                      curve: _emphasizedCurve,
+                      opacity: _showLeftOverflowIndicator ? 1 : 0,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                panelBackgroundColor,
+                                panelBackgroundColor.withValues(alpha: 0.92),
+                                panelBackgroundColor.withValues(alpha: 0.0),
+                              ],
+                              stops: const [0.0, 0.55, 1.0],
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-        Positioned(
-          right: 18,
-          bottom: 2,
+        Padding(
+          padding: const EdgeInsets.only(right: 18, top: 1),
           child: AnimatedBuilder(
             animation: _resultScrollController,
             builder: (context, child) {
+              final String indicatorText = _digitIndicatorText(
+                context,
+                effectiveResult,
+              );
+              if (indicatorText.isEmpty) {
+                return const SizedBox(height: 14);
+              }
               return Text(
-                _digitIndicatorText(context, effectiveResult),
+                indicatorText,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.right,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: scheme.onSurfaceVariant.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,

@@ -90,7 +90,7 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
   static const Curve _emphasizedCurve = Curves.easeOutCubic;
   static const Curve _deceleratedCurve = Curves.easeOutQuart;
   static const double _resultPanelHeightSplit = 100;
-  static const double _resultPanelHeightCompact = 104;
+  static const double _resultPanelHeightCompact = 114;
 
   late final ScrollController _expressionScrollController = ScrollController();
   late final CalculatorResultViewportController _resultViewportController =
