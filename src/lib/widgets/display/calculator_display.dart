@@ -89,7 +89,8 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
   static const Duration _resultAnimationDuration = Duration(milliseconds: 280);
   static const Curve _emphasizedCurve = Curves.easeOutCubic;
   static const Curve _deceleratedCurve = Curves.easeOutQuart;
-  static const double _resultPanelHeight = 112;
+  static const double _resultPanelHeightSplit = 100;
+  static const double _resultPanelHeightCompact = 104;
 
   late final ScrollController _expressionScrollController = ScrollController();
   late final CalculatorResultViewportController _resultViewportController =
@@ -178,7 +179,8 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
               : const Offset(0, -0.08),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final bool compactHeight = constraints.maxHeight < 140;
+              final bool veryCompact = constraints.maxHeight < 110;
+              final bool compactHeight = constraints.maxHeight < 150;
 
               return Center(
                 child: FittedBox(
@@ -197,7 +199,9 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
                           return Transform.scale(scale: value, child: child);
                         },
                         child: Container(
-                          padding: EdgeInsets.all(compactHeight ? 12 : 18),
+                          padding: EdgeInsets.all(
+                            veryCompact ? 6 : (compactHeight ? 10 : 18),
+                          ),
                           decoration: BoxDecoration(
                             color: scheme.surfaceContainerHighest.withValues(
                               alpha: 0.38,
@@ -206,12 +210,14 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
                           ),
                           child: Icon(
                             Icons.ads_click,
-                            size: compactHeight ? 28 : 42,
+                            size: veryCompact ? 22 : (compactHeight ? 28 : 42),
                             color: scheme.primary.withValues(alpha: 0.9),
                           ),
                         ),
                       ),
-                      SizedBox(height: compactHeight ? 10 : 16),
+                      SizedBox(
+                        height: veryCompact ? 4 : (compactHeight ? 8 : 16),
+                      ),
                       Text(
                         'Enter an expression…',
                         textAlign: TextAlign.center,
@@ -219,10 +225,14 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
                             ?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: scheme.onSurface.withValues(alpha: 0.42),
-                              fontSize: compactHeight ? 18 : null,
+                              fontSize: veryCompact
+                                  ? 15
+                                  : (compactHeight ? 18 : null),
                             ),
                       ),
-                      SizedBox(height: compactHeight ? 4 : 8),
+                      SizedBox(
+                        height: veryCompact ? 2 : (compactHeight ? 4 : 8),
+                      ),
                       Text(
                         'Click here to use your keyboard',
                         textAlign: TextAlign.center,
@@ -231,7 +241,9 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
                             alpha: 0.72,
                           ),
                           fontWeight: FontWeight.w700,
-                          fontSize: compactHeight ? 12 : null,
+                          fontSize: veryCompact
+                              ? 11
+                              : (compactHeight ? 12 : null),
                         ),
                       ),
                     ].column(mainAxisSize: MainAxisSize.min),
@@ -321,6 +333,10 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
   Widget _buildSubmitButton(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final bool emphasized = _hasExpression || _isFocused;
+    final bool useSplitLayout =
+        MediaQuery.of(context).size.width >=
+        CalculatorPageConstants.splitLayoutWidth;
+    final double buttonSize = useSplitLayout ? 64.0 : 48.0;
 
     return AnimatedSlide(
       duration: _contentAnimationDuration,
@@ -331,7 +347,7 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
         curve: Curves.easeOutBack,
         scale: emphasized ? 1 : 0.92,
         child: SizedBox.square(
-          dimension: 72,
+          dimension: buttonSize,
           child: FilledButton(
             onPressed: widget.onSubmitRequested,
             style: FilledButton.styleFrom(
@@ -340,7 +356,7 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
                   : scheme.primary.withValues(alpha: 0.82),
               foregroundColor: scheme.onPrimary,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(useSplitLayout ? 20 : 16),
               ),
               padding: EdgeInsets.zero,
               elevation: emphasized ? 4 : 0,
@@ -349,12 +365,19 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
               duration: _contentAnimationDuration,
               curve: _emphasizedCurve,
               style: TextStyle(
-                fontSize: emphasized ? 30 : 28,
+                fontSize: useSplitLayout
+                    ? (emphasized ? 30 : 28)
+                    : (emphasized ? 24 : 22),
                 fontWeight: FontWeight.bold,
                 color: scheme.onPrimary,
                 height: 1,
               ),
-              child: Center(child: _buildEqualsGlyph(color: scheme.onPrimary)),
+              child: Center(
+                child: _buildEqualsGlyph(
+                  color: scheme.onPrimary,
+                  size: useSplitLayout ? 26.0 : 20.0,
+                ),
+              ),
             ),
           ),
         ),
@@ -362,10 +385,10 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
     );
   }
 
-  Widget _buildEqualsBar(Color color) {
+  Widget _buildEqualsBar(Color color, {double width = 26, double height = 4}) {
     return Container(
-      width: 26,
-      height: 4,
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(99),
@@ -373,16 +396,20 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
     );
   }
 
-  Widget _buildEqualsGlyph({required Color color}) {
+  Widget _buildEqualsGlyph({required Color color, double size = 26.0}) {
+    final double barWidth = size * 0.9;
+    final double barHeight = size > 22 ? 3.5 : 2.5;
+    final double gap = size > 22 ? 5.0 : 3.5;
+
     return SizedBox(
-      width: 28,
-      height: 28,
+      width: size,
+      height: size,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildEqualsBar(color),
-          const SizedBox(height: 6),
-          _buildEqualsBar(color),
+          _buildEqualsBar(color, width: barWidth, height: barHeight),
+          SizedBox(height: gap),
+          _buildEqualsBar(color, width: barWidth, height: barHeight),
         ],
       ),
     );
@@ -425,6 +452,10 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
     // Keep focus and expression state in sync for animated layout.
     _syncLocalInteractionState();
 
+    final bool useSplitLayout =
+        MediaQuery.of(context).size.width >=
+        CalculatorPageConstants.splitLayoutWidth;
+
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final Color borderColor = _isFocused
         ? scheme.primary.withValues(alpha: 0.65)
@@ -452,10 +483,13 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
     return AnimatedContainer(
       duration: _containerAnimationDuration,
       curve: _emphasizedCurve,
-      margin: const EdgeInsets.all(12.0),
+      margin: EdgeInsets.symmetric(
+        horizontal: useSplitLayout ? 12.0 : 4.0,
+        vertical: useSplitLayout ? 8.0 : 2.0,
+      ),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(useSplitLayout ? 24 : 20),
         border: Border.all(color: borderColor, width: _isFocused ? 2.2 : 2),
         boxShadow: shadows,
       ),
@@ -463,10 +497,13 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
         Expanded(
           flex: _hasResult ? 3 : 5,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: useSplitLayout ? 12.0 : 6.0,
+            ),
             child: [
               Expanded(child: _buildExpressionEditor(context)),
-              const SizedBox(width: 16),
+              SizedBox(width: useSplitLayout ? 16 : 12),
               _buildSubmitButton(context),
             ].row(crossAxisAlignment: CrossAxisAlignment.center),
           ),
@@ -498,11 +535,9 @@ class _CalculatorDisplayState extends State<CalculatorDisplay> {
                       color: scheme.outlineVariant,
                     ),
                     SizedBox(
-                      height:
-                          MediaQuery.of(context).size.width >=
-                              CalculatorPageConstants.splitLayoutWidth
-                          ? _resultPanelHeight
-                          : _resultPanelHeight + 68,
+                      height: useSplitLayout
+                          ? _resultPanelHeightSplit
+                          : _resultPanelHeightCompact,
                       child: _buildResultPanel(context),
                     ),
                   ].column(),

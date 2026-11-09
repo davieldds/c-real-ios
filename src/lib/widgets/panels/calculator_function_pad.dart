@@ -2,6 +2,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/function_button_data.dart';
+import '../../pages/calculator/calculator_page_constants.dart';
 
 /// Scientific function pad with quick actions and insertion buttons.
 ///
@@ -44,6 +45,10 @@ class CalculatorFunctionPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool useSplitLayout =
+        MediaQuery.of(context).size.width >=
+        CalculatorPageConstants.splitLayoutWidth;
+
     final Color numberAccent = Theme.of(
       context,
     ).colorScheme.primary.withValues(alpha: 0.15);
@@ -52,21 +57,25 @@ class CalculatorFunctionPad extends StatelessWidget {
     ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
 
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: useSplitLayout ? 12.0 : 4.0,
+        vertical: useSplitLayout ? 12.0 : 4.0,
+      ),
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: EdgeInsets.symmetric(
+            horizontal: useSplitLayout ? 12.0 : 8.0,
+            vertical: useSplitLayout ? 12.0 : 8.0,
+          ),
           child: [
             [
               ?headerAction,
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       TextButton(
                         onPressed: onClearPressed,
@@ -77,12 +86,22 @@ class CalculatorFunctionPad extends StatelessWidget {
                           foregroundColor: Theme.of(
                             context,
                           ).colorScheme.onSecondaryContainer,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: const Text(
                           'Clear',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       TextButton(
                         onPressed: onDeletePressed,
                         style: TextButton.styleFrom(
@@ -92,27 +111,35 @@ class CalculatorFunctionPad extends StatelessWidget {
                           foregroundColor: Theme.of(
                             context,
                           ).colorScheme.onSecondaryContainer,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Icon(Icons.backspace_outlined),
+                        child: const Icon(Icons.backspace_outlined, size: 18),
                       ),
                     ],
                   ),
                 ),
               ),
             ].row(),
-            const SizedBox(height: 12),
+            SizedBox(height: useSplitLayout ? 12 : 8),
             Expanded(
               child: functionRows
                   .map(
                     (row) => Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
+                        padding: EdgeInsets.only(
+                          bottom: useSplitLayout ? 8.0 : 6.0,
+                        ),
                         child: row
                             .map(
                               (button) => Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 4.0,
+                                    horizontal: 3.0,
                                   ),
                                   child: TextButton(
                                     key: buttonKeys[button.insertion],
@@ -123,18 +150,25 @@ class CalculatorFunctionPad extends StatelessWidget {
                                           ? numberAccent
                                           : functionAccent,
                                       alignment: Alignment.center,
-                                      minimumSize: const Size.fromHeight(48),
-                                      textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      padding: EdgeInsets.zero,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
+                                        borderRadius: BorderRadius.circular(
+                                          useSplitLayout ? 16 : 14,
+                                        ),
                                       ),
                                     ),
-                                    child: Text(
-                                      button.label,
-                                      textAlign: TextAlign.center,
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        button.label,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: button.isNumber ? 20 : 16,
+                                          fontWeight: button.isNumber
+                                              ? FontWeight.bold
+                                              : FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),

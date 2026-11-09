@@ -15,9 +15,9 @@ class CalculatorCompactPanel extends StatelessWidget {
     required this.onViewChanged,
     required this.keypadPanel,
     required this.historyPanel,
-    this.segmentWidth = 220,
-    this.segmentHeight = 40,
-    this.headerPadding = const EdgeInsets.only(left: 24, top: 24),
+    this.segmentWidth = 176,
+    this.segmentHeight = 36,
+    this.headerPadding = const EdgeInsets.only(left: 18, top: 14),
     this.transitionDuration = const Duration(milliseconds: 200),
     this.indicatorDuration = const Duration(milliseconds: 250),
   });
@@ -194,15 +194,16 @@ class _SegmentTab extends StatelessWidget {
         child: [
           Icon(
             icon,
-            size: 18,
+            size: 16,
             color: isSelected
                 ? theme.colorScheme.onPrimary
                 : theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 250),
             style: TextStyle(
+              fontSize: 13,
               color: isSelected
                   ? theme.colorScheme.onPrimary
                   : theme.colorScheme.onSurfaceVariant,

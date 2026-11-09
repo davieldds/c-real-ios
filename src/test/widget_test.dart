@@ -113,4 +113,23 @@ void main() {
       expect(find.text('Expression Display'), findsNothing);
     },
   );
+
+  testWidgets('Renders properly in compact phone viewport without overflow', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    // Typical phone viewport (e.g. iPhone 15: 393 x 852)
+    await pumpMainApp(tester, viewport: const Size(393, 852));
+
+    expect(find.text('Enter an expression…'), findsOneWidget);
+    expect(find.text('Keypad'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'Clear'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '7'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

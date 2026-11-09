@@ -417,8 +417,8 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
       _resultHorizontalDragRemainder += delta;
       while (_resultHorizontalDragRemainder.abs() >= step) {
         final int direction = _resultHorizontalDragRemainder.isNegative
-            ? 1
-            : -1;
+            ? -1
+            : 1;
         _scrollResultByStep(context, direction);
         _resultHorizontalDragRemainder +=
             _resultHorizontalDragRemainder.isNegative ? step : -step;
@@ -578,7 +578,7 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
         Align(
           alignment: Alignment.center,
           child: SizedBox(
-            height: 60,
+            height: 48,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onHorizontalDragStart: (_) => _resetResultDragRemainders(),
@@ -643,7 +643,7 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: horizontalPadding,
-                                  vertical: 12,
+                                  vertical: 6,
                                 ),
                                 child: AnimatedSwitcher(
                                   duration: _resultAnimationDuration,
@@ -728,7 +728,7 @@ class _CalculatorResultViewportState extends State<CalculatorResultViewport> {
         ),
         Positioned(
           right: 18,
-          bottom: 16,
+          bottom: 2,
           child: AnimatedBuilder(
             animation: _resultScrollController,
             builder: (context, child) {

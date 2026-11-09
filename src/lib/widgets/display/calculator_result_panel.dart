@@ -66,12 +66,15 @@ class CalculatorResultPanel extends StatelessWidget {
         MediaQuery.of(context).size.width >=
         CalculatorPageConstants.splitLayoutWidth;
 
+    final double iconDimension = useSplitLayout ? 28 : 20;
+
     final List<Widget> buttons = [
       _ActionButton(
         key: copyButtonKey,
         tooltip: 'Copy result',
+        compact: !useSplitLayout,
         onPressed: enableCopy ? () => _copyResult(context, resultText) : null,
-        child: const Icon(Icons.copy),
+        child: Icon(Icons.copy, size: iconDimension),
       ),
       const SizedBox(width: 8),
       _ActionButton(
@@ -79,11 +82,12 @@ class CalculatorResultPanel extends StatelessWidget {
         tooltip: onIncreasePrecisionRequested == null
             ? 'The result is precise'
             : 'Increase precision',
+        compact: !useSplitLayout,
         onPressed: onIncreasePrecisionRequested,
         child: SvgPicture.asset(
           'assets/icons/AddPrecisionIcon.svg',
-          width: 32,
-          height: 32,
+          width: iconDimension,
+          height: iconDimension,
           colorFilter: ColorFilter.mode(
             scheme.onSecondaryContainer,
             BlendMode.srcIn,
@@ -96,11 +100,12 @@ class CalculatorResultPanel extends StatelessWidget {
         tooltip: onToggleFractionRequested == null
             ? 'Result is not fractional'
             : 'Toggle fraction / decimal',
+        compact: !useSplitLayout,
         onPressed: onToggleFractionRequested,
         child: SvgPicture.asset(
           'assets/icons/SwitchIcon.svg',
-          width: 32,
-          height: 32,
+          width: iconDimension,
+          height: iconDimension,
           colorFilter: ColorFilter.mode(
             scheme.onSecondaryContainer,
             BlendMode.srcIn,
@@ -118,17 +123,21 @@ class CalculatorResultPanel extends StatelessWidget {
             tooltip: canJump
                 ? 'Jump to most significant digit'
                 : 'No left overflow to jump to',
+            compact: !useSplitLayout,
             onPressed: canJump
                 ? resultViewportController.jumpToMostSignificantDigit
                 : null,
-            child: const Icon(Icons.first_page),
+            child: Icon(Icons.first_page, size: iconDimension),
           );
         },
       ),
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: 14.0,
+        vertical: useSplitLayout ? 10.0 : 6.0,
+      ),
       child: useSplitLayout
           ? [
               ...buttons,
@@ -137,7 +146,7 @@ class CalculatorResultPanel extends StatelessWidget {
             ].row()
           : [
               Expanded(key: resultViewportKey, child: resultViewport),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               buttons.row(mainAxisAlignment: MainAxisAlignment.center),
             ].column(),
     );
@@ -160,11 +169,13 @@ class _ActionButton extends StatelessWidget {
     required this.tooltip,
     required this.onPressed,
     required this.child,
+    this.compact = false,
   });
 
   final String tooltip;
   final VoidCallback? onPressed;
   final Widget child;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -177,13 +188,13 @@ class _ActionButton extends StatelessWidget {
         curve: Curves.easeOutBack,
         scale: isEnabled ? 1 : 0.94,
         child: IconButton.filledTonal(
-          iconSize: 32,
+          iconSize: compact ? 20 : 28,
           onPressed: onPressed,
           style: IconButton.styleFrom(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(compact ? 12 : 16),
             ),
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(compact ? 8 : 12),
           ),
           icon: child,
         ),

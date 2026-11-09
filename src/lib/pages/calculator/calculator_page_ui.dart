@@ -146,15 +146,30 @@ class _CalculatorPageState extends _CalculatorPageStateBase
                 final bool useSplitLayout =
                     constraints.maxWidth >=
                     CalculatorPageConstants.splitLayoutWidth;
-                final double expressionHeight = (constraints.maxHeight * 0.22)
-                    .clamp(120.0, 180.0);
-                final double resultHeight = useSplitLayout ? 96.0 : 164.0;
+                final bool hasResult = _resultText.trim().isNotEmpty;
+
+                final double expressionHeight = useSplitLayout
+                    ? (constraints.maxHeight * 0.20).clamp(110.0, 160.0)
+                    : (constraints.maxHeight * 0.12).clamp(84.0, 104.0);
+
+                final double resultHeight = useSplitLayout
+                    ? (hasResult ? 100.0 : 0.0)
+                    : (hasResult ? 104.0 : 0.0);
+
+                final double displayHeight = expressionHeight + resultHeight;
+                final double horizontalPadding = useSplitLayout ? 12.0 : 8.0;
+                final double verticalPadding = useSplitLayout ? 12.0 : 6.0;
 
                 return Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding,
+                  ),
                   child: [
-                    SizedBox(
-                      height: expressionHeight + resultHeight + 10,
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 260),
+                      curve: Curves.easeOutCubic,
+                      height: displayHeight,
                       child: KeyedSubtree(
                         key: _tutorialTargets.displayPanelKey,
                         child: CalculatorDisplay(
@@ -204,7 +219,7 @@ class _CalculatorPageState extends _CalculatorPageStateBase
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: useSplitLayout ? 10 : 6),
                     Expanded(
                       child: useSplitLayout
                           ? _buildSplitContent()
@@ -239,9 +254,12 @@ class _CalculatorPageState extends _CalculatorPageStateBase
   }
 
   Widget _buildCompactContent() {
-    final Widget segmentAction = const SizedBox(width: 220, height: 40);
+    final Widget segmentAction = const SizedBox(width: 176, height: 36);
 
     return CalculatorCompactPanel(
+      segmentWidth: 176,
+      segmentHeight: 36,
+      headerPadding: const EdgeInsets.only(left: 18, top: 14),
       activeView: _compactPanelView,
       onViewChanged: (view) {
         setState(() {
